@@ -34,7 +34,7 @@
                             $status = strtolower($order->status ?? 'pending');
                             $badgeClass = 'badge-secondary';
                             $badgeColor = '#6c757d';
-                            if ($status == 'paid') {
+                            if ($status == 'paid') { 
                                 $badgeClass = 'badge-success';
                                 $badgeColor = '#28a745';
                             } elseif ($status == 'pending') {
@@ -47,7 +47,7 @@
                         @endphp
                         <p class="mb-0"><strong>Status:</strong> 
                             <span class="badge {{ $badgeClass }}" style="background-color: {{ $badgeColor }}; color: white; padding: 0.25em 0.6em; border-radius: 0.25rem;">
-                                {{ ucfirst($order->status ?? 'Pending') }}
+                                {{ ucfirst($order->status ?? 'Cash on Delivery') }}
                             </span>
                         </p>
                     </div>

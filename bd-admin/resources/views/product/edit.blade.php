@@ -599,7 +599,7 @@
                                                 </div>
 
                                                 {{-- Body Size --}}
-                                                <div class="col-md-12 mb-3">
+                                                <div class="col-md-12 mb-3" style="display:none">
                                                       <label class="form-label col-md-12 fw-bold">Body Size</label>
                                                       <select class="form-select form-control-sm col-md-12 body-size-select">
                                                          <option value="">-- Select Body Size --</option>
@@ -613,7 +613,7 @@
                                                 </div>
 
                                                 {{-- Common Size --}}
-                                                <div class="col-md-12 mb-3">
+                                                <div class="col-md-12 mb-3" style="display:none">
                                                       <label class="form-label col-md-12 fw-bold">Common Size</label>
                                                       <select class="form-select form-control-sm col-md-12 common-size-select">
                                                          <option value="">-- Select Common Size --</option>

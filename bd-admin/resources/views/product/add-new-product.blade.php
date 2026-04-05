@@ -370,7 +370,7 @@
                      <div class="card-header p-2" id="headingColor">
                         <h6 class="mb-0">
                            <button class="btn btn-info collapsed newTabButtonStyle" type="button" data-toggle="collapse" data-target="#collapseThumbnail">
-                           Select Thumbnail Images
+                             Select Thumbnail Images
                            </button>
                         </h6>
                      </div>
@@ -848,18 +848,20 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
                     ${colorOptions}
                 </select>
             </div>
-            <div class="form-group mt-2">
-                <label>Size</label>
-                <select class="form-control form-control-sm size-select" name="body_sizes[]">
-                    ${bodySizeOptions}
-                </select>
-            </div>
-            <div class="form-group mt-2">
-                <label>Common Size</label>
-                <select class="form-control form-control-sm common-size-select" name="common_sizes[]">
-                    ${commonSizeOptions}
-                </select>
-            </div>
+            <div style="display:none!important">
+                <div class="form-group mt-2"">
+                    <label>Size</label>
+                    <select class="form-control form-control-sm size-select" name="body_sizes[]">
+                        ${bodySizeOptions}
+                    </select>
+                </div>
+                <div class="form-group mt-2" >
+                    <label>Common Size</label>
+                    <select class="form-control form-control-sm common-size-select" name="common_sizes[]">
+                        ${commonSizeOptions}
+                    </select>
+                </div>
+            </div>        
             <div class="form-group mt-2">
                 <label>Barcode</label>
                 <input type="text" class="form-control form-control-sm barcode-input" name="barcodes[]" placeholder="Enter Barcode">

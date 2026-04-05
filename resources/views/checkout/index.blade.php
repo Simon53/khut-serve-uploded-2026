@@ -47,11 +47,9 @@
                         </div>
                         <div class="form-group">
                             <label>Country *</label>
-                            <select class="form-control billing-field" id="billingCountry" required>
-                                <option value="">Select Country...</option>
-                                <option value="">Select Country...</option>
+                            <select class="form-control billing-field" id="billingCountry" required readonly>
                                 <option value="Bangladesh" selected>Bangladesh</option>
-                                <option value="Afghanistan">Afghanistan</option>
+                                <!--option value="Afghanistan">Afghanistan</option>
                                 <option value="Albania">Albania</option>
                                 <option value="Algeria">Algeria</option>
                                 <option value="Argentina">Argentina</option>
@@ -107,7 +105,7 @@
                                 <option value="United Arab Emirates">United Arab Emirates</option>
                                 <option value="United Kingdom">United Kingdom</option>
                                 <option value="United States">United States</option>
-                                <option value="Vietnam">Vietnam</option>
+                                <option value="Vietnam">Vietnam</option-->
                             </select>
                             <div class="invalid-feedback" id="errorCountry" style="display: none; color: #dc3545; font-size: 0.875rem;"></div>
                         </div>
@@ -619,7 +617,7 @@
     }
 
     // Update payment method options based on postcode
-    function updatePaymentMethods() {
+    /*function updatePaymentMethods() {
         const postcode = $("#billingPostcode").length ? $("#billingPostcode").val() : $("#billing input[placeholder='4-digit Number']").val() || '';
         
         if (postcode && /^\d{4}$/.test(postcode.trim())) {
@@ -650,7 +648,53 @@
                 $("input[name='paymentMethod'][value='card']").prop('checked', true);
             }
         }
+    }*/
+    
+    
+    // Update payment method options based on postcode AND district
+function updatePaymentMethods() {
+    const postcode = $("#billingPostcode").length ? $("#billingPostcode").val() : $("#billing input[placeholder='4-digit Number']").val() || '';
+    const district = $("#billingDistrict").val() || '';
+
+    const codOption = $("#codPaymentOption");
+    const cardRadio = $("input[name='paymentMethod'][value='card']");
+    const codRadio = $("input[name='paymentMethod'][value='cod']");
+
+    if (district && district.toLowerCase() !== 'dhaka') {
+        // District Dhaka na hole COD hide
+        codOption.hide();
+        if (codRadio.is(':checked')) {
+            cardRadio.prop('checked', true);
+        }
+        return; // Exit function, postcode logic skipped
     }
+
+    // Only run postcode logic if district = Dhaka
+    if (postcode && /^\d{4}$/.test(postcode.trim())) {
+        const isInSpecialRange = isPostcodeInSpecialRange(postcode);
+        
+        if (isInSpecialRange) {
+            codOption.show();
+            if (cardRadio.is(':checked')) {
+                codRadio.prop('checked', true);
+            }
+        } else {
+            codOption.hide();
+            if (codRadio.is(':checked')) {
+                cardRadio.prop('checked', true);
+            }
+        }
+    } else {
+        // Postcode not entered or invalid - hide COD by default
+        codOption.hide();
+        if (!$("input[name='paymentMethod']:checked").length) {
+            cardRadio.prop('checked', true);
+        }
+    }
+}
+    
+    
+
 
     function loadOrderSummary() {
         const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -764,7 +808,8 @@
             const phone = $("#billing input[placeholder*='01']").val() || '';
             const address = $("#billing input[placeholder*='Building']").val() || '';
             const country = $("#billingCountry").val() || '';
-            const district = $("#billing select.form-control.billing-field").val() || '';
+            //const district = $("#billing select.form-control.billing-field").val() || '';
+            const district = $("#billingDistrict").val() || '';
             const city = $("#billing input[placeholder='Town / City']").val() || '';
             const postcode = $("#billing input[placeholder='4-digit Number']").val() || '';
             
@@ -807,7 +852,8 @@
         address: $("#billing input[placeholder*='Building']").val(),
         apartment: $("#billing input[placeholder*='Apartment']").val() || '',
         country: $("#billingCountry").val() || 'Bangladesh',
-        district: $("#billing select.form-control.billing-field").val(),
+        //district: $("#billing select.form-control.billing-field").val(),
+        district: $("#billingDistrict").val(),
         city: $("#billing input[placeholder='Town / City']").val(),
         postcode: $("#billing input[placeholder='4-digit Number']").val(),
         note: $("#billing textarea").val() || '',

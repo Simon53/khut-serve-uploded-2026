@@ -16,7 +16,7 @@
             <td>{{ $order->id }}</td>
             <td>{{ $order->first_name }} {{ $order->last_name }}</td>
             <td>{{ $order->phone }}</td>
-            <td>৳ {{ $order->total }}</td>
+            <td> {{ $order->total }}</td>
             <td>{{ ucfirst($order->status) }}</td>
             <td>{{ strtoupper($order->payment_method) }}</td>
             <td>

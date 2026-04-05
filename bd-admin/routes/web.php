@@ -177,14 +177,23 @@ Route::delete('/slider/delete/{id}', [SliderController::class, 'destroy'])->name
 
 //order route
 Route::prefix('admin')->group(function () {
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+   // Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    //Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
     Route::get('/orders/latest', [OrderController::class, 'latest'])->name('orders.latest');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show'); // Order details
 
     // ✅ Delivery status update
-    Route::patch('/orders/{id}/delivery-status', [OrderController::class, 'updateDeliveryStatus'])
-        ->name('orders.updateDeliveryStatus');
+    
+        
+    // Route::patch('/orders/{id}/delivery-status', [OrderController::class, 'updateDeliveryStatus'])->name('orders.updateDeliveryStatus');
+    
+       //Route::patch('/orders/{id}/delivery-status', [OrderController::class, 'updateDeliveryStatus'])->name('orders.updateDeliveryStatus');
+       
+       
+        Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+        Route::patch('/orders/{id}/delivery-status', [OrderController::class, 'updateDeliveryStatus'])->name('orders.updateDeliveryStatus');
+        
 });
 
 

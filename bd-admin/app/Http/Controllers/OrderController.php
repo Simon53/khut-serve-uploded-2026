@@ -7,11 +7,20 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index(){
+   /* public function index(){
     $orders = Order::orderByRaw("CASE WHEN delivery_status = 'pending' THEN 0 ELSE 1 END")
                    ->orderBy('id', 'desc')
                    ->paginate(10);
 
+        return view('orders.orders', compact('orders'));
+    }*/
+    
+    public function index(){
+        $orders = Order::with('items') // ✅ add this
+            ->orderByRaw("CASE WHEN delivery_status = 'pending' THEN 0 ELSE 1 END")
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+    
         return view('orders.orders', compact('orders'));
     }
 
@@ -44,17 +53,21 @@ class OrderController extends Controller
     }
 
 
-    public function updateDeliveryStatus(Request $request, Order $order)
-{
-    $request->validate([
-        'delivery_status' => 'required|in:pending,delivered'
-    ]);
-
-    $order->update([
-        'delivery_status' => $request->delivery_status
-    ]);
-
-    // 🔔 dashboard auto refresh trigger
-    return response()->json(['success' => true]);
-}
+    public function updateDeliveryStatus(Request $request, $id){
+        // If request is JSON, Laravel can still read via input()
+        $request->validate([
+            'delivery_status' => 'required|in:pending,delivered,cancel,confirmed',
+        ]);
+    
+        $order = Order::find($id);
+        if(!$order){
+            return response()->json(['success' => false,'message' => 'Order not found'], 404);
+        }
+    
+        // Use input() to read JSON payload
+        $order->delivery_status = $request->input('delivery_status');
+        $order->save();
+    
+        return response()->json(['success' => true,'message' => 'Delivery status updated successfully']);
+    }
 }

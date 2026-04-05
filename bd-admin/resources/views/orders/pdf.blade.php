@@ -60,12 +60,14 @@
 
     <!-- Customer Info -->
     <div>
-        <p><strong>Name:</strong> {{ $order->first_name }} {{ $order->last_name }}</p>
-        <p><strong>Phone:</strong> {{ $order->phone }}</p>
-        <p><strong>Email:</strong> {{ $order->email }}</p>
-        <p><strong>Address:</strong> {{ $order->address }}, {{ $order->city }}, {{ $order->district }}, {{ $order->postcode }}</p>
-        <p><strong>Payment:</strong> {{ $order->payment_method === 'cod' ? 'Cash on Delivery' : 'Paid' }}</p>
-        <p><strong>Status:</strong> {{ ucfirst($order->status) }}</p>
+        <p><strong>Name:</strong>  {{ $order->first_name }} {{ $order->last_name }}</p>
+            <p><strong>Phone:</strong>  {{ $order->phone }}</p>
+            <p><strong>Email:</strong>  {{ $order->email }}</p>
+            <p><strong>Address:</strong>  {{ $order->address }}, {{ $order->city }}, {{ $order->district }}, {{ $order->postcode }}</p>
+            <p><strong>Note:</strong> {{ $order->notes ?? '-' }}</p>
+            <p style="display:none"><strong>Payment Method:</strong>  {{ $order->payment_method === 'cod' ? 'Cash on Delivery' : 'Paid' }}</p>
+            <p><strong>Order Date:</strong> {{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') }}</p>
+            <p><strong>Status:</strong>  {{ ucfirst($order->status) }}</p>
     </div>
 
     <!-- Order Items Table -->
