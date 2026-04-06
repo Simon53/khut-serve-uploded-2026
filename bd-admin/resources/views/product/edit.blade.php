@@ -978,12 +978,7 @@ $(document).ready(function() {
     }
 });
 
-// ===== Normalize path for preview =====
-
-
-
-
-
+   // ===== Normalize path for preview =====
    tinymce.init({
         selector: '#productDetailsEditor',
         license_key: 'gpl',
@@ -1044,36 +1039,24 @@ $(document).ready(function() {
     });
 
 
-
-
-
-
-
-
-      $(document).ready(function () {
-         $('input[type="radio"]').click(function () {
-            let $this = $(this);
-            if ($this.data('waschecked') == true) {
-                  $this.prop('checked', false);
-                  $this.data('waschecked', false);
-            } else {
-                  $('input[name="' + $this.attr('name') + '"]').data('waschecked', false);
-                  $this.data('waschecked', true);
-            }
-         });
+   $(document).ready(function () {
+      $('input[type="radio"]').click(function () {
+         let $this = $(this);
+         if ($this.data('waschecked') == true) {
+               $this.prop('checked', false);
+               $this.data('waschecked', false);
+         } else {
+               $('input[name="' + $this.attr('name') + '"]').data('waschecked', false);
+               $this.data('waschecked', true);
+         }
       });
+   });
 
-   
-   
 
-      
-      
-    $(document).on('click', '.add-thumb-option', function () {
+   $(document).on('click', '.add-thumb-option', function () {
         activeThumbEl = $(this).closest('.thumbnail-wrapper');
     
         $('#thumbOptionRows').html('');
-    
-        // ✅ থাম্বনেইল ইমেজ ধরো
         let imgSrc = activeThumbEl.find('img').attr('src') || '';
     
         // যদি image path শুধু filename বা gallery/... হয়

@@ -753,7 +753,6 @@
     });
 
     $(document).ready(function () {
-      // рж╕ржм radio button-ржПрж░ ржЬржирзНржп ржХрж╛ржЬ ржХрж░ржмрзЗ
       $('input[type="radio"]').click(function () {
          let $this = $(this);
 
@@ -877,7 +876,7 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
     let images = currentVal ? currentVal.split(',') : [];
     if (!images.includes(relativePath)) {
         images.push(relativePath);
-        hiddenInput.val(images.join(',')); // DB-তে যাবে শুধুই gallery/filename.jpg
+        hiddenInput.val(images.join(',')); 
     }
 }
 
@@ -892,8 +891,6 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
    });
 
 
-
-   
    
    //main image selection from gallery
   $(document).on('click', '.gallery-image', function () {
@@ -911,9 +908,6 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
         $(this).toggleClass('selected');
     }
 });
-
-
-
 
 
    // ========== Local Upload (thumbnail) ==========
@@ -951,8 +945,6 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
    });
 
 
-
-
    $('#selectFromLocal').on('click', function () {
       $('#thumbnailUploadOptionModal').modal('hide');
       $('#imageSelectModal').modal('hide');
@@ -978,12 +970,6 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
 
-
-  
-   
-   
-   
-   
    //=======================thamneil select from local device================
    $('#localThumbnailInput').on('change', function () {
     const files = this.files;
@@ -1017,11 +1003,6 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
    
-   
-
-
-
-
    
     // ========== Main Image Upload local divice ==========
     $('#imageUploadForm').on('submit', function (e) {
@@ -1181,9 +1162,5 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 
 });
 
-
-
 </script>
-
-
 @endsection
