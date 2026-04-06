@@ -13,84 +13,83 @@ use DB;
 class HomeController extends Controller
 {
     public function homeIndex()
-{
-    // 🔹 Dashboard stats
-    $productCategories = MainMenu::count();
-    $totalProducts = Product::count();
-    $soldOutProducts = Product::where(function ($q) {
-        $q->where('stock_status', 'out_of_stock')
-          ->orWhere('sale_price', 'N')
-          ->orWhereNull('sale_price');
-    })->count();
-    $newOrders = Order::whereIn('status', ['pending', 'new'])->count();
-    $deliveredOrders = Order::where('delivery_status', 'delivered')->count();
-    $deliveryPending = Order::where('delivery_status', 'pending')->count();
-    $registeredCustomer = Customer::count();
+    {
+        // Dashboard Stats
+        $productCategories = MainMenu::count();
+        $totalProducts = Product::count();
 
-    // 🔹 Weekly Sale (Last 7 days)
-    $weekly = Order::select(
-        DB::raw('DATE(created_at) as date'),
-        DB::raw('SUM(total) as total')
-    )
-    ->where('created_at', '>=', \Carbon\Carbon::now()->subDays(6))
-    ->groupBy('date')
-    ->orderBy('date')
-    ->get();
+        // Correct Sold Out Products (stock_status = out_of_stock)
+        $soldOutProducts = Product::where('stock_status', 'out_of_stock')->count();
 
-    // 🔹 Monthly Sale (Last 12 months)
-    $monthly = Order::select(
-        DB::raw('MONTH(created_at) as month'),
-        DB::raw('YEAR(created_at) as year'),
-        DB::raw('SUM(total) as total')
-    )
-    ->where('created_at', '>=', \Carbon\Carbon::now()->subMonths(11))
-    ->groupBy('year','month')
-    ->orderBy('year')
-    ->orderBy('month')
-    ->get();
+        $newOrders = Order::whereIn('status', ['pending', 'new'])->count();
+        $deliveredOrders = Order::where('delivery_status', 'delivered')->count();
+        $deliveryPending = Order::where('delivery_status', 'pending')->count();
+        $confirmedDelivery = Order::where('delivery_status', 'confirmed')->count();
+        $cancelOrder = Order::where('delivery_status', 'cancel')->count();
 
-    // 🔹 Yearly Sale (Last 5 years)
-    $yearly = Order::select(
-        DB::raw('YEAR(created_at) as year'),
-        DB::raw('SUM(total) as total')
-    )
-    ->where('created_at', '>=', \Carbon\Carbon::now()->subYears(4))
-    ->groupBy('year')
-    ->orderBy('year')
-    ->get();
+        $registeredCustomer = Customer::count();
 
-    // 🔹 Pass all to Blade
-    return view('home.home', compact(
-        'productCategories',
-        'totalProducts',
-        'soldOutProducts',
-        'newOrders',
-        'deliveredOrders',
-        'deliveryPending',
-        'registeredCustomer',
-        'weekly',
-        'monthly',
-        'yearly'
-    ));
-}
+        // Weekly Sale (Last 7 days)
+        $weekly = Order::select(
+            DB::raw('DATE(created_at) as date'),
+            DB::raw('SUM(total) as total')
+        )
+        ->where('created_at', '>=', Carbon::now()->subDays(6))
+        ->groupBy('date')
+        ->orderBy('date')
+        ->get();
 
+        // Monthly Sale (Last 12 months)
+        $monthly = Order::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('SUM(total) as total')
+        )
+        ->where('created_at', '>=', Carbon::now()->subMonths(11))
+        ->groupBy('year','month')
+        ->orderBy('year')
+        ->orderBy('month')
+        ->get();
 
+        // Yearly Sale (Last 5 years)
+        $yearly = Order::select(
+            DB::raw('YEAR(created_at) as year'),
+            DB::raw('SUM(total) as total')
+        )
+        ->where('created_at', '>=', Carbon::now()->subYears(4))
+        ->groupBy('year')
+        ->orderBy('year')
+        ->get();
 
-public function dashboardStats()
-{
-    return response()->json([
-        'productCategories' => MainMenu::count(),
-        'totalProducts' => Product::count(),
-        'soldOutProducts' => Product::where(function ($q) {
-            $q->where('stock_status', 'out_of_stock')
-              ->orWhere('sale_price', 'N')
-              ->orWhereNull('sale_price');
-        })->count(),
-        'newOrders' => Order::whereIn('status', ['pending','new'])->count(),
-        'deliveredOrders' => Order::where('delivery_status','delivered')->count(),
-        'deliveryPending' => Order::where('delivery_status','pending')->count(),
-        'registeredCustomer' => Customer::count(),
-    ]);
-}
+        return view('home.home', compact(
+            'productCategories',
+            'totalProducts',
+            'soldOutProducts',
+            'newOrders',
+            'deliveredOrders',
+            'deliveryPending',
+            'confirmedDelivery',
+            'cancelOrder',
+            'registeredCustomer',
+            'weekly',
+            'monthly',
+            'yearly'
+        ));
+    }
 
+    // For AJAX stats update
+    public function dashboardStats()
+    {
+        return response()->json([
+            'productCategories' => MainMenu::count(),
+            'totalProducts' => Product::count(),
+            'soldOutProducts' => Product::where('stock_status', 'out_of_stock')->count(),
+            'newOrders' => Order::whereIn('status', ['pending','new'])->count(),
+            'deliveredOrders' => Order::where('delivery_status','delivered')->count(),
+            'deliveryPending' => Order::where('delivery_status','pending')->count(),
+            'confirmedDelivery' => Order::where('delivery_status','confirmed')->count(),
+            'cancelOrder' => Order::where('delivery_status','cancel')->count(),
+            'registeredCustomer' => Customer::count(),
+        ]);
+    }
 }
