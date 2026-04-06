@@ -1066,21 +1066,6 @@ $(document).ready(function() {
    
    
 
-     // Open modal & load existing options
-    /*  $(document).on('click', '.add-thumb-option', function () {
-         activeThumbEl = $(this).closest('.thumbnail-wrapper');
-
-         // Clear modal rows
-         $('#thumbOptionRows').html('');
-
-         // Load existing options
-         const existingOptions = activeThumbEl.data('options') || [];
-         existingOptions.forEach(opt => {
-            $('#thumbOptionRows').append(generateOptionRow(allCommonSizes, allBodySizes, opt));
-         });
-
-         $('#thumbOptionModal').modal('show');
-      });*/
       
       
     $(document).on('click', '.add-thumb-option', function () {
@@ -1408,33 +1393,6 @@ $(document).on('click', '.remove-thumbnail', function() {
 
 
 
-/*function updateThumbnailInput() {
-    let thumbnails = [];
-    $('#thumbnailPreview .thumbnail-wrapper').each(function () {
-        thumbnails.push({
-            id: $(this).data('id') ?? null,
-            image_path: $(this).find('img').attr('src'),
-            thumb_color: $(this).find('.color-select').val() || null,
-            thumb_size: $(this).find('.body-size-select').val() || null,
-            thumb_common_size: $(this).find('.common-size-select').val() || null,
-            thumb_barcode: $(this).find('.barcode-input').val() || null,
-            options: $(this).data('options') || []
-            
-        });
-    });
-
-    $('#thumbnailImages').val(JSON.stringify(thumbnails));
-}
-
-
-
-
-// Remove thumbnail
-$(document).on('click', '.remove-thumbnail', function() {
-    $(this).closest('.thumbnail-wrapper').remove();
-    updateThumbnailInput();
-});*/
-
 // Update hidden input on change
 $(document).on('change', '.color-select, .body-size-select, .common-size-select, .barcode-input', function() {
     updateThumbnailInput();
@@ -1571,38 +1529,7 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
 
-   // ========== Main Image Upload local divice ==========
-  /* $('#imageUploadForm').on('submit', function (e) {
-    e.preventDefault();
-    let formData = new FormData(this);
-
-    $.ajax({
-        url: "{{ route('upload.gallery.image') }}",
-        type: 'POST',
-        data: formData,
-        contentType: false,
-        processData: false,
-        success: function (res) {
-            if (res.url) {
-                // res.url = full URL (e.g. https://dev.khut.shop/bd-admin/public/storage/gallery/abc.jpg)
-                const relativePath = res.url.split('/storage/')[1]; // gallery/abc.jpg
-                const fullUrl = window.location.origin + '/storage/' + relativePath;
-
-                $('#mainImage').val(relativePath);
-                $('#mainImagePreview').html(`<img src="${fullUrl}" alt="Preview" class="img-fluid" style="max-height: 200px;">`);
-
-                $('#imageSelectModal').modal('hide');
-                toastr.success('Image Saved!');
-            } else {
-                toastr.error('Invalid response!');
-            }
-        },
-        error: function (xhr) {
-            console.error(xhr.responseText);
-            toastr.error('Image upload failed.');
-        }
-    });
-});*/
+ 
 
 
 const appUrl = "{{ url('') }}"; // https://khut.shop/bd-admin/public
@@ -1679,116 +1606,116 @@ $('#imageUploadForm').on('submit', function (e) {
        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
    });
    
-$('#submitUpdateProductBtn').on('click', function (e) {
-    e.preventDefault();
+   $('#submitUpdateProductBtn').on('click', function (e) {
+      e.preventDefault();
 
-    let formData = new FormData();
-    formData.append('id', $('#productId').val());
-    formData.append('name_en', $('#nameEn').val());
-    formData.append('name_bn', $('#nameBn').val());
-    formData.append('price', $('#price').val());
-    formData.append('details', tinymce.get('productDetailsEditor').getContent());
-     
-    formData.append('main_image', $('#mainImage').val());
+      let formData = new FormData();
+      formData.append('id', $('#productId').val());
+      formData.append('name_en', $('#nameEn').val());
+      formData.append('name_bn', $('#nameBn').val());
+      formData.append('price', $('#price').val());
+      formData.append('details', tinymce.get('productDetailsEditor').getContent());
+      
+      formData.append('main_image', $('#mainImage').val());
 
-    formData.append('main_menu_id', $('#mainMenuSelect').val());
-    formData.append('sub_menu_id', $('#subMenuSelect').val());
-    formData.append('child_menu_id', $('#childMenuSelect').val());
+      formData.append('main_menu_id', $('#mainMenuSelect').val());
+      formData.append('sub_menu_id', $('#subMenuSelect').val());
+      formData.append('child_menu_id', $('#childMenuSelect').val());
 
-    formData.append('sale_price', $('#sale_price').val());
-    formData.append('sale_from_dates', $('#sale_from_dates').val());
-    formData.append('Sale_to_dates', $('#Sale_to_dates').val());
-    formData.append('tax_status', $('#tax_status').val());
-    formData.append('tax_class', $('#tax_class').val());
-    formData.append('weight_kg', $('#weight_kg').val());
-    formData.append('length', $('#length').val());
-    formData.append('width', $('#width').val());
-    formData.append('height', $('#height').val());
-    formData.append('product_serial', $('#product_serial').val());
-    formData.append('product_barcode', $('#product_barcode').val());
+      formData.append('sale_price', $('#sale_price').val());
+      formData.append('sale_from_dates', $('#sale_from_dates').val());
+      formData.append('Sale_to_dates', $('#Sale_to_dates').val());
+      formData.append('tax_status', $('#tax_status').val());
+      formData.append('tax_class', $('#tax_class').val());
+      formData.append('weight_kg', $('#weight_kg').val());
+      formData.append('length', $('#length').val());
+      formData.append('width', $('#width').val());
+      formData.append('height', $('#height').val());
+      formData.append('product_serial', $('#product_serial').val());
+      formData.append('product_barcode', $('#product_barcode').val());
 
-    formData.append('stock_status', $('input[name="stock_status"]:checked').val());
-    formData.append('link_status', $('input[name="link_status"]:checked').val());
-    formData.append('stock_management', $('#stock_management').is(':checked') ? 1 : 0);
-    formData.append('sold_individually', $('#sold_individually').is(':checked') ? 1 : 0);
-    formData.append('site_view_status', $('#site_view_status').is(':checked') ? 'Y' : 'N');
-    formData.append('published_site', $('#published_site').is(':checked') ? 'Y' : 'N');
-    formData.append('festive_collection', $('#festive_collection').is(':checked') ? 'Y' : 'N');
-    formData.append('new_arrivals', $('#new_arrivals').is(':checked') ? 'Y' : 'N');
-    formData.append('patchwork', $('#patchwork').is(':checked') ? 'Y' : 'N');
-    formData.append('feature', $('input[name="feature"]:checked').val());
-    formData.append('highlight', $('input[name="highlight"]:checked').val());
-    formData.append('bottom_fastive', $('input[name="bottom_fastive"]:checked').val());
+      formData.append('stock_status', $('input[name="stock_status"]:checked').val());
+      formData.append('link_status', $('input[name="link_status"]:checked').val());
+      formData.append('stock_management', $('#stock_management').is(':checked') ? 1 : 0);
+      formData.append('sold_individually', $('#sold_individually').is(':checked') ? 1 : 0);
+      formData.append('site_view_status', $('#site_view_status').is(':checked') ? 'Y' : 'N');
+      formData.append('published_site', $('#published_site').is(':checked') ? 'Y' : 'N');
+      formData.append('festive_collection', $('#festive_collection').is(':checked') ? 'Y' : 'N');
+      formData.append('new_arrivals', $('#new_arrivals').is(':checked') ? 'Y' : 'N');
+      formData.append('patchwork', $('#patchwork').is(':checked') ? 'Y' : 'N');
+      formData.append('feature', $('input[name="feature"]:checked').val());
+      formData.append('highlight', $('input[name="highlight"]:checked').val());
+      formData.append('bottom_fastive', $('input[name="bottom_fastive"]:checked').val());
 
-    $('input[name="common_sizes[]"]:checked').each(function () {
-        formData.append('common_sizes[]', this.value);
-    });
-    $('input[name="body_sizes[]"]:checked').each(function () {
-        formData.append('body_sizes[]', this.value);
-    });
-    $('input[name="colors[]"]:checked').each(function () {
-        formData.append('colors[]', this.value);
-    });
-    $('input[name="statuses[]"]:checked').each(function () {
-        formData.append('statuses[]', this.value);
-    });
-    $('input[name="irons[]"]:checked').each(function () {
-        formData.append('irons[]', this.value);
-    });
-    $('input[name="dry_washes[]"]:checked').each(function () {
-        formData.append('dry_washes[]', this.value);
-    });
-
-    // ✅ Collect thumbnails and send as JSON
-    let thumbnails = [];
-      $('#thumbnailPreview .thumbnail-wrapper').each(function () {
-         thumbnails.push({
-            id: $(this).data('id') ?? null,
-            image_path: $(this).find('img').attr('src'),
-            thumb_color: $(this).find('.color-select').val() || null,
-            thumb_size: $(this).find('.body-size-select').val() || null,
-            thumb_common_size: $(this).find('.common-size-select').val() || null,
-            thumb_barcode: $(this).find('.barcode-input').val() || null,
-            options: $(this).data('options') || []  // ✅ add this
-         });
+      $('input[name="common_sizes[]"]:checked').each(function () {
+         formData.append('common_sizes[]', this.value);
       });
-    formData.append('thumbnail_images', JSON.stringify(thumbnails));
+      $('input[name="body_sizes[]"]:checked').each(function () {
+         formData.append('body_sizes[]', this.value);
+      });
+      $('input[name="colors[]"]:checked').each(function () {
+         formData.append('colors[]', this.value);
+      });
+      $('input[name="statuses[]"]:checked').each(function () {
+         formData.append('statuses[]', this.value);
+      });
+      $('input[name="irons[]"]:checked').each(function () {
+         formData.append('irons[]', this.value);
+      });
+      $('input[name="dry_washes[]"]:checked').each(function () {
+         formData.append('dry_washes[]', this.value);
+      });
 
-    $.ajax({
-        type: "POST",
-        url: "{{ url('product/update') }}/" + $('#productId').val(),
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-        },
-        success: function (res) {
-            toastr.success("Product updated successfully!");
-        },
-        error: function (xhr) {
-            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-                let errors = xhr.responseJSON.errors;
-                Object.keys(errors).forEach(function (field) {
-                    errors[field].forEach(function (msg) {
-                        toastr.error(msg);
-                    });
-                });
-                return;
-            }
-            if (xhr.status === 419) {
-                toastr.error("Session expired. Please refresh the page.");
-                return;
-            }
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                toastr.error(xhr.responseJSON.message);
-            } else {
-                toastr.error("Something went wrong!");
-            }
-            console.error(xhr.responseText);
-        }
-    });
-});
+      // ✅ Collect thumbnails and send as JSON
+      let thumbnails = [];
+         $('#thumbnailPreview .thumbnail-wrapper').each(function () {
+            thumbnails.push({
+               id: $(this).data('id') ?? null,
+               image_path: $(this).find('img').attr('src'),
+               thumb_color: $(this).find('.color-select').val() || null,
+               thumb_size: $(this).find('.body-size-select').val() || null,
+               thumb_common_size: $(this).find('.common-size-select').val() || null,
+               thumb_barcode: $(this).find('.barcode-input').val() || null,
+               options: $(this).data('options') || []  // ✅ add this
+            });
+         });
+      formData.append('thumbnail_images', JSON.stringify(thumbnails));
+
+      $.ajax({
+         type: "POST",
+         url: "{{ url('product/update') }}/" + $('#productId').val(),
+         data: formData,
+         processData: false,
+         contentType: false,
+         headers: {
+               "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+         },
+         success: function (res) {
+               toastr.success("Product updated successfully!");
+         },
+         error: function (xhr) {
+               if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                  let errors = xhr.responseJSON.errors;
+                  Object.keys(errors).forEach(function (field) {
+                     errors[field].forEach(function (msg) {
+                           toastr.error(msg);
+                     });
+                  });
+                  return;
+               }
+               if (xhr.status === 419) {
+                  toastr.error("Session expired. Please refresh the page.");
+                  return;
+               }
+               if (xhr.responseJSON && xhr.responseJSON.message) {
+                  toastr.error(xhr.responseJSON.message);
+               } else {
+                  toastr.error("Something went wrong!");
+               }
+               console.error(xhr.responseText);
+         }
+      });
+   });
 
 
 });
