@@ -168,7 +168,7 @@
                     </li>
                 @endforeach
 
-            </ul>  
+            </ul> 
         </div>
 
         <!-- Product Grid -->
@@ -316,6 +316,8 @@ $(document).on('click', '.main-menu-tab, .sub-menu-tab, .child-menu-tab', functi
 
 </script>
 
+
+
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
@@ -362,5 +364,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 </script>
+
+
 
 @endsection

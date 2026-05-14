@@ -107,27 +107,27 @@
         });
 
         /// Add color
-$('#addColorBtn').click(function () {
-    let colorName = $('#colorNameInput').val().trim();
-
-    if (colorName === '') {
-        toastr.warning('Color name is required.');
-        return;
-    }
-
-    $.post("{{ route('color.store') }}", { color_name: colorName }, function (res) {
-        toastr.success(res.message);
-        $('#addColorModal').modal('hide');
-        $('#colorNameInput').val('');
+        $('#addColorBtn').click(function () {
+            let colorName = $('#colorNameInput').val().trim();
         
-        setTimeout(function () {
-            location.reload(); // 🔄 Auto reload
-        }, 1000);
-
-    }).fail(function (xhr) {
-        toastr.error('Failed to add color.');
-    });
-});
+            if (colorName === '') {
+                toastr.warning('Color name is required.');
+                return;
+            }
+        
+            $.post("{{ route('color.store') }}", { color_name: colorName }, function (res) {
+                toastr.success(res.message);
+                $('#addColorModal').modal('hide');
+                $('#colorNameInput').val('');
+                
+                setTimeout(function () {
+                    location.reload(); // 🔄 Auto reload
+                }, 1000);
+        
+            }).fail(function (xhr) {
+                toastr.error('Failed to add color.');
+            });
+        });
 
 // Edit script
 $(document).on('click', '.editColorBtn', function () {

@@ -104,45 +104,19 @@ $sorted = $inStockItems->values()->merge($soldOutItems->values());
     
     
 @foreach($products as $product)
-   @php
-          $allBarcodes = [];
+    @php
+        $primaryBarcode = $product->thumbnails->first()?->thumb_barcode 
+                        ?: $product->product_barcode 
+                        ?: null;
 
-        // Main product barcode
-        if (!empty($product->product_barcode)) {
-            $allBarcodes[] = $product->product_barcode;
+        // Skip products without barcode
+        if (!$primaryBarcode) {
+            continue;
         }
 
-        // Thumbnail barcodes
-        foreach ($product->thumbnails as $thumb) {
-            if (!empty($thumb->thumb_barcode)) {
-                $allBarcodes[] = $thumb->thumb_barcode;
-            }
-        }
-
-        // Option barcodes
-        foreach ($product->options as $option) {
-            if (!empty($option->barcode)) {
-                $allBarcodes[] = $option->barcode;
-            }
-        }
-
-        // Duplicate remove
-        $allBarcodes = array_unique($allBarcodes);
-
-        // Default sold out
-        $inStock = false;
-
-        foreach ($allBarcodes as $barcode) {
-
-            $barcodeNorm = ltrim($barcode, '0');
-
-            $stock = (int)($khutCatalogNorm[$barcodeNorm]['stock'] ?? 0);
-
-            if ($stock > 0) {
-                $inStock = true;
-                break;
-            }
-        }
+        $primaryBarcodeNorm = ltrim($primaryBarcode,'0');
+        $apiStock = (int)($khutCatalogNorm[$primaryBarcodeNorm]['stock'] ?? 0);
+        $inStock = $apiStock > 0;
     @endphp
 
       @if(!$inStock && request()->get('page', 1) == 1)

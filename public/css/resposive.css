@@ -1,9 +1,18 @@
+
+
+
 @media (max-width: 480px) {
-    
-    
-    
-    
-    
+    .Patchwork-btn{
+        margin-top: -24px!important;
+    }
+
+    .product-title{
+        margin-top: 20px;
+    }
+
+    .left-content h2{
+        margin-top: -6px!important;
+    }
     
     .slider-overlay {
         left: 20px;
@@ -12,6 +21,39 @@
 /*.bd-example{
     height: 100px;
 }*/
+.product-title-bangla{
+    font-size: 24px;
+    margin-top: -1px;
+}
+.price {
+    margin-top: -4px; 
+}
+.details-text{
+    margin-top: 0px!important;
+}
+
+.custom-mobile-btn{
+    margin-top: -3px !important;
+}
+
+.left-content h1{
+    font-size: 24px;
+}
+.btnposition-desctop-home-1{
+   position: absolute; 
+   /*margin-top: 460px!important; */
+   margin-top: 490px!important; 
+   right: 40%;
+   /*z-index: 1000;*/
+}
+.btnposition-desctop-home-2{
+    position: absolute; 
+	margin-top: 564px!important; 
+	right: 40%;
+}
+.footet-mobile-postion {
+    margin-top: -80px;
+}
 
 .topGap-1{
     margin-top: 10px;
@@ -114,7 +156,7 @@ margin-bottom: 40px;
     }
 
     .fastive-text-div {
-        margin-top: 164px!important;
+        margin-top: 100px!important;
         padding: 10px;
         width: 80%;
     }
@@ -168,6 +210,14 @@ margin-bottom: 40px;
     .mobdetailbtn a{
         font-size: 1rem;
         padding: 10px;
+    }
+}
+
+@media (max-width: 320px) {
+    .btnposition-desctop-home-1{
+       position: absolute;
+       margin-top: 504px;
+       right: 40%; /* adjust if needed */
     }
 }
 
@@ -233,6 +283,12 @@ margin-bottom: 40px;
         height: 250px;
          margin-top: 5px;
     }
+.hozoboro-text-2{
+margin-top: -99px!important;
+}
+.hozoborolo-row{
+    margin-top: -12px!important;
+}
 
     #customCarousel .carousel-item img,
     .sliderImgSize {
@@ -242,9 +298,7 @@ margin-bottom: 40px;
 
     .slider-overlay {
         left: 20px;
-        /* মোবাইলে একটু কম জায়গা নেবে */
-        width: 160px;
-        /* overlay ছোট হবে */
+        width: 140px;
         padding: 5px;
     }
 

@@ -159,7 +159,7 @@
                            <div class="col-md-12 mt-3">
                               <label for="exampleInputUsername1">Link Options</label>
                            </div>
-                           <div class="col-sm-6">
+                           <div class="col-sm-4">
                               <div class="form-check">
                                  <label class="form-check-label">
                                  <input type="radio" class="form-check-input" name="link_status" value="Add to Cart"
@@ -167,11 +167,19 @@
                                  </label>
                               </div>
                            </div>
-                           <div class="col-sm-6">
+                           <div class="col-sm-4">
                               <div class="form-check">
                                  <label class="form-check-label">
                                  <input type="radio" class="form-check-input" name="link_status" value="Read More"
                                  {{ $product->link_status == 'Read More' ? 'checked' : '' }}> Read More <i class="input-helper"></i>
+                                 </label>
+                              </div>
+                           </div>
+                           <div class="col-sm-4">
+                              <div class="form-check">
+                                 <label class="form-check-label">
+                                 <input type="radio" class="form-check-input" name="link_status" value="Explore"
+                                 {{ $product->link_status == 'Explore' ? 'checked' : '' }}> Explore <i class="input-helper"></i>
                                  </label>
                               </div>
                            </div>
@@ -195,7 +203,7 @@
                            <div class="col-sm-4">
                               <div class="form-check">
                                  <label class="form-check-label">
-                                 <input  type="checkbox"  class="form-check-input"  name="festive_collection"   id="festive_collection"  value="fastive-collection" {{ $product->festive_collection == 'fastive-collection' ? 'checked' : '' }}> Festive Collection <i class="input-helper"></i>
+                                 <input  type="checkbox"  class="form-check-input"  name="festive_collection"   id="festive_collection"  value="Y" {{ $product->festive_collection == 'Y' ? 'checked' : '' }}> Festive Collection <i class="input-helper"></i>
                                  </label>
                               </div>
                            </div>
@@ -308,7 +316,7 @@
                               <input type="text" class="form-control col-md-12" id="product_serial" name="product_serial" value="{{ $product->product_serial }}" placeholder="product_serial">
                            </div>
                            <div class="form-group col-md-12 text-center">
-                              <a href="#" class="btn btn-info openImageModal" data-target="#mainImage">+ Choose Image</a>
+                              <a href="#" class="btn btn-info openImageModal btn-lg" data-target="#mainImage">+ Choose Image</a>
                            </div>
                            
                            <div class="form-group col-md-12 text-center p-2">
@@ -823,9 +831,9 @@
      </div>
    </div>
    <div class="col-md-12 text-center">
-         <button type="button" class="btn btn-primary" id="submitUpdateProductBtn">Update Product</button>
-         <!--button id="updateProductBtn" class="btn btn-success">Update Product</button-->
-         <a href="{{ route('product.list') }}" class="btn btn-secondary">Back</a>
+         <button type="button" class="btn btn-primary btn-lg" id="submitUpdateProductBtn">Update Product</button>
+         <button type="button" class="btn btn-success btn-lg" id="btnPreview">Preview Product</button>
+         <a href="{{ route('product.list') }}" class="btn btn-secondary btn-lg">Back</a>
       </div>
 </div>
 <!-- Image Selection Modal -->
@@ -931,6 +939,23 @@
 </div>
 
 
+<div class="modal fade" id="productPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border: 2px solid #000;">
+            <div class="modal-header" style="background: #fff; border-bottom: 1px solid #000;">
+                <h5 class="modal-title" style="color: #000; font-weight: bold;">Full Product Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: #000;"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" id="previewContainer" style="background: #fff;">
+                </div>
+            <div class="modal-footer" style="border-top: 1px solid #000;">
+                <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @endsection  
 @section('script')
 
@@ -978,7 +1003,12 @@ $(document).ready(function() {
     }
 });
 
-   // ===== Normalize path for preview =====
+// ===== Normalize path for preview =====
+
+
+
+
+
    tinymce.init({
         selector: '#productDetailsEditor',
         license_key: 'gpl',
@@ -1026,7 +1056,7 @@ $(document).ready(function() {
         },
 
         // Custom Button for Google Map
-        setup: function(editor) {
+       /* setup: function(editor) {
             editor.ui.registry.addButton('insertMapBtn', {
                 text: '📍 Map',
                 onAction: function() {
@@ -1035,33 +1065,60 @@ $(document).ready(function() {
                     editor.insertContent(mapIframe);
                 }
             });
-        }
+        }*/
     });
 
 
-   $(document).ready(function () {
-      $('input[type="radio"]').click(function () {
-         let $this = $(this);
-         if ($this.data('waschecked') == true) {
-               $this.prop('checked', false);
-               $this.data('waschecked', false);
-         } else {
-               $('input[name="' + $this.attr('name') + '"]').data('waschecked', false);
-               $this.data('waschecked', true);
-         }
+
+
+
+
+
+
+      $(document).ready(function () {
+         $('input[type="radio"]').click(function () {
+            let $this = $(this);
+            if ($this.data('waschecked') == true) {
+                  $this.prop('checked', false);
+                  $this.data('waschecked', false);
+            } else {
+                  $('input[name="' + $this.attr('name') + '"]').data('waschecked', false);
+                  $this.data('waschecked', true);
+            }
+         });
       });
-   });
 
+   
+   
 
-   $(document).on('click', '.add-thumb-option', function () {
+     // Open modal & load existing options
+    /*  $(document).on('click', '.add-thumb-option', function () {
+         activeThumbEl = $(this).closest('.thumbnail-wrapper');
+
+         // Clear modal rows
+         $('#thumbOptionRows').html('');
+
+         // Load existing options
+         const existingOptions = activeThumbEl.data('options') || [];
+         existingOptions.forEach(opt => {
+            $('#thumbOptionRows').append(generateOptionRow(allCommonSizes, allBodySizes, opt));
+         });
+
+         $('#thumbOptionModal').modal('show');
+      });*/
+      
+      
+    $(document).on('click', '.add-thumb-option', function () {
         activeThumbEl = $(this).closest('.thumbnail-wrapper');
     
         $('#thumbOptionRows').html('');
+    
+        // ✅ থাম্বনেইল ইমেজ ধরো
         let imgSrc = activeThumbEl.find('img').attr('src') || '';
     
         // যদি image path শুধু filename বা gallery/... হয়
         if (imgSrc && !imgSrc.startsWith('/storage/')) {
-            imgSrc = '/storage/' + imgSrc;
+            imgSrc = 'https://khut.shop/bd-admin/public/storage/' + imgSrc;
         }
     
         console.log('Preview path:', imgSrc);
@@ -1376,6 +1433,33 @@ $(document).on('click', '.remove-thumbnail', function() {
 
 
 
+/*function updateThumbnailInput() {
+    let thumbnails = [];
+    $('#thumbnailPreview .thumbnail-wrapper').each(function () {
+        thumbnails.push({
+            id: $(this).data('id') ?? null,
+            image_path: $(this).find('img').attr('src'),
+            thumb_color: $(this).find('.color-select').val() || null,
+            thumb_size: $(this).find('.body-size-select').val() || null,
+            thumb_common_size: $(this).find('.common-size-select').val() || null,
+            thumb_barcode: $(this).find('.barcode-input').val() || null,
+            options: $(this).data('options') || []
+            
+        });
+    });
+
+    $('#thumbnailImages').val(JSON.stringify(thumbnails));
+}
+
+
+
+
+// Remove thumbnail
+$(document).on('click', '.remove-thumbnail', function() {
+    $(this).closest('.thumbnail-wrapper').remove();
+    updateThumbnailInput();
+});*/
+
 // Update hidden input on change
 $(document).on('change', '.color-select, .body-size-select, .common-size-select, .barcode-input', function() {
     updateThumbnailInput();
@@ -1512,7 +1596,38 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
 
- 
+   // ========== Main Image Upload local divice ==========
+  /* $('#imageUploadForm').on('submit', function (e) {
+    e.preventDefault();
+    let formData = new FormData(this);
+
+    $.ajax({
+        url: "{{ route('upload.gallery.image') }}",
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        success: function (res) {
+            if (res.url) {
+                // res.url = full URL (e.g. https://dev.khut.shop/bd-admin/public/storage/gallery/abc.jpg)
+                const relativePath = res.url.split('/storage/')[1]; // gallery/abc.jpg
+                const fullUrl = window.location.origin + '/storage/' + relativePath;
+
+                $('#mainImage').val(relativePath);
+                $('#mainImagePreview').html(`<img src="${fullUrl}" alt="Preview" class="img-fluid" style="max-height: 200px;">`);
+
+                $('#imageSelectModal').modal('hide');
+                toastr.success('Image Saved!');
+            } else {
+                toastr.error('Invalid response!');
+            }
+        },
+        error: function (xhr) {
+            console.error(xhr.responseText);
+            toastr.error('Image upload failed.');
+        }
+    });
+});*/
 
 
 const appUrl = "{{ url('') }}"; // https://khut.shop/bd-admin/public
@@ -1589,119 +1704,329 @@ $('#imageUploadForm').on('submit', function (e) {
        headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') }
    });
    
-   $('#submitUpdateProductBtn').on('click', function (e) {
-      e.preventDefault();
+$('#submitUpdateProductBtn').on('click', function (e) {
+    e.preventDefault();
 
-      let formData = new FormData();
-      formData.append('id', $('#productId').val());
-      formData.append('name_en', $('#nameEn').val());
-      formData.append('name_bn', $('#nameBn').val());
-      formData.append('price', $('#price').val());
-      formData.append('details', tinymce.get('productDetailsEditor').getContent());
-      
-      formData.append('main_image', $('#mainImage').val());
+    let formData = new FormData();
+    formData.append('id', $('#productId').val());
+    formData.append('name_en', $('#nameEn').val());
+    formData.append('name_bn', $('#nameBn').val());
+    formData.append('price', $('#price').val());
+    formData.append('details', tinymce.get('productDetailsEditor').getContent());
+     
+    formData.append('main_image', $('#mainImage').val());
 
-      formData.append('main_menu_id', $('#mainMenuSelect').val());
-      formData.append('sub_menu_id', $('#subMenuSelect').val());
-      formData.append('child_menu_id', $('#childMenuSelect').val());
+    formData.append('main_menu_id', $('#mainMenuSelect').val());
+    formData.append('sub_menu_id', $('#subMenuSelect').val());
+    formData.append('child_menu_id', $('#childMenuSelect').val());
 
-      formData.append('sale_price', $('#sale_price').val());
-      formData.append('sale_from_dates', $('#sale_from_dates').val());
-      formData.append('Sale_to_dates', $('#Sale_to_dates').val());
-      formData.append('tax_status', $('#tax_status').val());
-      formData.append('tax_class', $('#tax_class').val());
-      formData.append('weight_kg', $('#weight_kg').val());
-      formData.append('length', $('#length').val());
-      formData.append('width', $('#width').val());
-      formData.append('height', $('#height').val());
-      formData.append('product_serial', $('#product_serial').val());
-      formData.append('product_barcode', $('#product_barcode').val());
+    formData.append('sale_price', $('#sale_price').val());
+    formData.append('sale_from_dates', $('#sale_from_dates').val());
+    formData.append('Sale_to_dates', $('#Sale_to_dates').val());
+    formData.append('tax_status', $('#tax_status').val());
+    formData.append('tax_class', $('#tax_class').val());
+    formData.append('weight_kg', $('#weight_kg').val());
+    formData.append('length', $('#length').val());
+    formData.append('width', $('#width').val());
+    formData.append('height', $('#height').val());
+    formData.append('product_serial', $('#product_serial').val());
+    formData.append('product_barcode', $('#product_barcode').val());
 
-      formData.append('stock_status', $('input[name="stock_status"]:checked').val());
-      formData.append('link_status', $('input[name="link_status"]:checked').val());
-      formData.append('stock_management', $('#stock_management').is(':checked') ? 1 : 0);
-      formData.append('sold_individually', $('#sold_individually').is(':checked') ? 1 : 0);
-      formData.append('site_view_status', $('#site_view_status').is(':checked') ? 'Y' : 'N');
-      formData.append('published_site', $('#published_site').is(':checked') ? 'Y' : 'N');
-      formData.append('festive_collection', $('#festive_collection').is(':checked') ? 'Y' : 'N');
-      formData.append('new_arrivals', $('#new_arrivals').is(':checked') ? 'Y' : 'N');
-      formData.append('patchwork', $('#patchwork').is(':checked') ? 'Y' : 'N');
-      formData.append('feature', $('input[name="feature"]:checked').val());
-      formData.append('highlight', $('input[name="highlight"]:checked').val());
-      formData.append('bottom_fastive', $('input[name="bottom_fastive"]:checked').val());
+    formData.append('stock_status', $('input[name="stock_status"]:checked').val());
+    formData.append('link_status', $('input[name="link_status"]:checked').val());
+    formData.append('stock_management', $('#stock_management').is(':checked') ? 1 : 0);
+    formData.append('sold_individually', $('#sold_individually').is(':checked') ? 1 : 0);
+    formData.append('site_view_status', $('#site_view_status').is(':checked') ? 'Y' : 'N');
+    formData.append('published_site', $('#published_site').is(':checked') ? 'Y' : 'N');
+    formData.append('festive_collection', $('#festive_collection').is(':checked') ? 'Y' : 'N');
+    formData.append('new_arrivals', $('#new_arrivals').is(':checked') ? 'Y' : 'N');
+    formData.append('patchwork', $('#patchwork').is(':checked') ? 'Y' : 'N');
+    formData.append('feature', $('input[name="feature"]:checked').val());
+    formData.append('highlight', $('input[name="highlight"]:checked').val());
+    formData.append('bottom_fastive', $('input[name="bottom_fastive"]:checked').val());
 
-      $('input[name="common_sizes[]"]:checked').each(function () {
-         formData.append('common_sizes[]', this.value);
-      });
-      $('input[name="body_sizes[]"]:checked').each(function () {
-         formData.append('body_sizes[]', this.value);
-      });
-      $('input[name="colors[]"]:checked').each(function () {
-         formData.append('colors[]', this.value);
-      });
-      $('input[name="statuses[]"]:checked').each(function () {
-         formData.append('statuses[]', this.value);
-      });
-      $('input[name="irons[]"]:checked').each(function () {
-         formData.append('irons[]', this.value);
-      });
-      $('input[name="dry_washes[]"]:checked').each(function () {
-         formData.append('dry_washes[]', this.value);
-      });
+    $('input[name="common_sizes[]"]:checked').each(function () {
+        formData.append('common_sizes[]', this.value);
+    });
+    $('input[name="body_sizes[]"]:checked').each(function () {
+        formData.append('body_sizes[]', this.value);
+    });
+    $('input[name="colors[]"]:checked').each(function () {
+        formData.append('colors[]', this.value);
+    });
+    $('input[name="statuses[]"]:checked').each(function () {
+        formData.append('statuses[]', this.value);
+    });
+    $('input[name="irons[]"]:checked').each(function () {
+        formData.append('irons[]', this.value);
+    });
+    $('input[name="dry_washes[]"]:checked').each(function () {
+        formData.append('dry_washes[]', this.value);
+    });
 
-      // ✅ Collect thumbnails and send as JSON
-      let thumbnails = [];
-         $('#thumbnailPreview .thumbnail-wrapper').each(function () {
-            thumbnails.push({
-               id: $(this).data('id') ?? null,
-               image_path: $(this).find('img').attr('src'),
-               thumb_color: $(this).find('.color-select').val() || null,
-               thumb_size: $(this).find('.body-size-select').val() || null,
-               thumb_common_size: $(this).find('.common-size-select').val() || null,
-               thumb_barcode: $(this).find('.barcode-input').val() || null,
-               options: $(this).data('options') || []  // ✅ add this
-            });
+    // ✅ Collect thumbnails and send as JSON
+    let thumbnails = [];
+      $('#thumbnailPreview .thumbnail-wrapper').each(function () {
+         thumbnails.push({
+            id: $(this).data('id') ?? null,
+            image_path: $(this).find('img').attr('src'),
+            thumb_color: $(this).find('.color-select').val() || null,
+            thumb_size: $(this).find('.body-size-select').val() || null,
+            thumb_common_size: $(this).find('.common-size-select').val() || null,
+            thumb_barcode: $(this).find('.barcode-input').val() || null,
+            options: $(this).data('options') || []  // ✅ add this
          });
-      formData.append('thumbnail_images', JSON.stringify(thumbnails));
-
-      $.ajax({
-         type: "POST",
-         url: "{{ url('product/update') }}/" + $('#productId').val(),
-         data: formData,
-         processData: false,
-         contentType: false,
-         headers: {
-               "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-         },
-         success: function (res) {
-               toastr.success("Product updated successfully!");
-         },
-         error: function (xhr) {
-               if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-                  let errors = xhr.responseJSON.errors;
-                  Object.keys(errors).forEach(function (field) {
-                     errors[field].forEach(function (msg) {
-                           toastr.error(msg);
-                     });
-                  });
-                  return;
-               }
-               if (xhr.status === 419) {
-                  toastr.error("Session expired. Please refresh the page.");
-                  return;
-               }
-               if (xhr.responseJSON && xhr.responseJSON.message) {
-                  toastr.error(xhr.responseJSON.message);
-               } else {
-                  toastr.error("Something went wrong!");
-               }
-               console.error(xhr.responseText);
-         }
       });
-   });
+    formData.append('thumbnail_images', JSON.stringify(thumbnails));
+
+    $.ajax({
+        type: "POST",
+        url: "{{ url('product/update') }}/" + $('#productId').val(),
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (res) {
+            toastr.success("Product updated successfully!");
+        },
+        error: function (xhr) {
+            if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                let errors = xhr.responseJSON.errors;
+                Object.keys(errors).forEach(function (field) {
+                    errors[field].forEach(function (msg) {
+                        toastr.error(msg);
+                    });
+                });
+                return;
+            }
+            if (xhr.status === 419) {
+                toastr.error("Session expired. Please refresh the page.");
+                return;
+            }
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                toastr.error(xhr.responseJSON.message);
+            } else {
+                toastr.error("Something went wrong!");
+            }
+            console.error(xhr.responseText);
+        }
+    });
+});
 
 
 });
      
+</script>
+
+
+
+
+
+<script>
+$(document).ready(function() {
+    $('#btnPreview').on('click', function() {
+        // ১. Basic Info
+        let nameEn = $('#nameEn').val() || 'N/A';
+        let nameBn = $('#nameBn').val() || 'N/A';
+        let price = $('#price').val() || '0.00';
+        let salePrice = $('#sale_price').val() || '0.00';
+        let productBarcode = $('#product_barcode').val() || '0.00';
+
+        // ২. Category Logic
+        let mainCat = $('#mainMenuSelect option:selected').text();
+        let subCat = $('#subMenuSelect option:selected').text();
+        let childCat = $('#childMenuSelect option:selected').text();
+        let fullCategory = "";
+        if(mainCat && mainCat !== "Select Main Menu") fullCategory += mainCat;
+        if(subCat && subCat !== "Select Sub Menu") fullCategory += " > " + subCat;
+        if(childCat && childCat !== "Select Child Menu") fullCategory += " > " + childCat;
+        if(!fullCategory) fullCategory = "Not Selected";
+
+        // ৩. Multi-select Data (Size, Color, Wash, etc.)
+        let getCheckedValues = (name) => {
+            let values = [];
+            $(`input[name='${name}']:checked`).each(function() {
+                values.push($(this).closest('.form-check').text().trim() || $(this).parent().text().trim());
+            });
+            return values.length > 0 ? values.join(', ') : 'Not Selected';
+        };
+
+        let selectedSizes = getCheckedValues('body_sizes[]');
+        let selectedColors = getCheckedValues('colors[]');
+        let selectedWash = getCheckedValues('statuses[]');
+        let selectedDryWash = getCheckedValues('dry_washes[]');
+        let selectedIron = getCheckedValues('irons[]');
+
+        // ৪. Single Options (Link & Feature)
+        let linkStatus = $("input[name='link_status']:checked").val() || 'None';
+        let feature = $("input[name='feature']:checked").val() || 'None';
+
+        // ৫. View Status Checkboxes
+        let statuses = [];
+        if($('#site_view_status').is(':checked')) statuses.push("Show Home");
+        if($('#published_site').is(':checked')) statuses.push("Published");
+        if($('#festive_collection').is(':checked')) statuses.push("Festive Collection");
+        if($('#new_arrivals').is(':checked')) statuses.push("New Arrivals");
+        let viewStatusText = statuses.length > 0 ? statuses.join(', ') : 'None';
+
+        // ৬. Images (Main Image)
+        let mainImgHtml = $('#mainImagePreview').html() || '<p style="color:red">No Main Image Selected</p>';
+        
+       // --- ৬.১ থাম্বনেইল গ্যালারি লজিক (Simplified & Direct) ---
+         let thumbImgHtml = '';
+         let thumbElements = $('#thumbnailPreview .thumbnail-wrapper[data-id]'); // Main wrapper-ti dhorlam
+
+         if (thumbElements.length > 0) {
+            thumbElements.each(function() {
+               let $this = $(this);
+               let imgSrc = $this.find('img').first().attr('src');
+               let colorName = $this.find('.color-select option:selected').text() || 'N/A';
+               
+               // Data options read korar jonno alternative way
+               let rawOptions = $this.find('.add-thumb-option').parent().attr('data-options');
+               let optionsData = [];
+               
+               try {
+                     optionsData = JSON.parse(rawOptions);
+               } catch (e) {
+                     optionsData = [];
+               }
+
+               let optionsRows = '';
+               if(optionsData && optionsData.length > 0) {
+                     optionsData.forEach(opt => {
+                        // Form-er dropdown theke label neya
+                        let bSize = $(`.body-size-select option[value="${opt.body_size_id}"]`).first().text() || 'N/A';
+                        let cSize = $(`.common-size-select option[value="${opt.common_size_id}"]`).first().text() || '';
+                        
+                        optionsRows += `
+                           <tr>
+                                 <td>${cSize} ${cSize && bSize ? '/' : ''} ${bSize}</td>
+                                 <td>${opt.barcode || '---'}</td>
+                           </tr>`;
+                     });
+               }
+
+               thumbImgHtml += `
+                     <div style="width: 100%; border-bottom: 1px solid #ddd; padding: 12px 0; display: flex; align-items: flex-start; gap: 12px;">
+                        <img src="${imgSrc}" style="width: 85px; height: 85px; object-fit: cover; border-radius: 6px; border: 1px solid #eee;">
+                        <div style="flex:1;">
+                           <div style="font-size: 13px; font-weight:bold; color: #333;">Color: <span style="color:#007bff;">${colorName}</span></div>
+                           <table class="table table-sm table-bordered" style="font-size:11px; margin-top:5px; background:#fff; margin-bottom:0;">
+                                 <thead style="background:#f8f9fa;"><tr><th>Size (Common/Body)</th><th>Barcode</th></tr></thead>
+                                 <tbody>
+                                    ${optionsRows || '<tr><td colspan="2" class="text-center text-muted">No variants added</td></tr>'}
+                                 </tbody>
+                           </table>
+                        </div>
+                     </div>
+               `;
+            });
+         } else {
+            thumbImgHtml = '<p style="color:red; font-size:12px; padding:10px;">No Thumbnails Found</p>';
+         }
+
+
+        // ৭. CKEditor Data Fix
+       let productDetails = "";
+        if (typeof tinymce !== "undefined" && tinymce.get('productDetailsEditor')) {
+            productDetails = tinymce.get('productDetailsEditor').getContent();
+        } else {
+            productDetails = $('#productDetailsEditor').val();
+        }
+
+        if (!productDetails || productDetails.trim() === "" || productDetails === "<p>&nbsp;</p>") {
+            productDetails = '<span style="color:red">No details entered yet.</span>';
+        }
+
+        // ৮. Preview HTML Template
+        let previewHtml = `
+            <div style="color: #000 !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.5; font-size:14px;">
+                <div class="row">
+                    <div class="col-md-7 border-right">
+                        <div class="pb-2 border-bottom mb-3">
+                            <h3 style="color:#000; font-weight:bold; margin:0 0 5px 0;">${nameEn}</h3>
+                            <h5 style="color:#555; margin:0 0 10px 0; font-weight:normal;">${nameBn}</h5>
+                            <p style="margin-bottom:8px;"><strong>Category:</strong> <span class="text-info" style="font-weight:bold;">${fullCategory}</span></p>
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                <span class="badge badge-success">Link Status: ${linkStatus}</span>
+                                <span class="badge badge-primary">Feature: ${feature}</span>
+                                <span class="badge badge-info">View Status: ${viewStatusText}</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 style="font-weight:bold; color:#333; text-transform:uppercase; font-size:12px; letter-spacing:1px; margin-bottom:10px;">Pricing & Variants</h6>
+                            <table class="table table-sm table-striped table-bordered" style="font-size:13px;">
+                                <tbody>
+                                    <tr> <td style="width:40%;"><strong>Main Barcode</strong></td> <td style="color:#d9534f; font-weight:bold;">${productBarcode}</td> </tr>
+                                    <tr> <td style="width:40%;"><strong>Regular Price</strong></td> <td style="color:#d9534f; font-weight:bold;">৳ ${price}</td> </tr>
+                                    <tr> <td><strong>Sale Price</strong></td> <td style="color:#5cb85c; font-weight:bold;">৳ ${salePrice}</td> </tr>
+                                    <tr> <td><strong>Available Sizes</strong></td> <td>${selectedSizes}</td> </tr>
+                                    <tr> <td><strong>Available Colors</strong></td> <td>${selectedColors}</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 style="font-weight:bold; color:#333; text-transform:uppercase; font-size:12px; letter-spacing:1px; margin-bottom:10px;">Product Care</h6>
+                            <table class="table table-sm table-striped table-bordered" style="font-size:13px;">
+                                <tbody>
+                                    <tr> <td style="width:40%;"><strong>Wash Type</strong></td> <td>${selectedWash}</td> </tr>
+                                    <tr> <td><strong>Dry Wash</strong></td> <td>${selectedDryWash}</td> </tr>
+                                    <tr> <td><strong>Iron Status</strong></td> <td>${selectedIron}</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-12 mt-4 pt-3 border-top">
+                              <h5 class="bg-dark text-white p-2" style="border-radius:4px 4px 0 0; margin-bottom:0;">About Product Details</h5>
+                              <div class="preview-content-box" style="border: 1px solid #ccc; border-top:none; padding: 15px; background: #fff; min-height: 120px; max-height:300px; overflow-y: auto; border-radius:0 0 4px 4px; font-size:13px;">
+                                 ${productDetails}
+                              </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div style="margin-bottom:20px; text-center">
+                            <h6 style="font-weight:bold; color:#333; text-align:center; margin-bottom:10px;">Main Product Image</h6>
+                            <div class="main-image-container" style="border: 2px solid #ddd; padding: 5px; background: #fff; border-radius:4px; min-height: 250px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                ${mainImgHtml}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h6 style="font-weight:bold; color:#333; margin-bottom:10px;">Thumbnail Gallery (Variants)</h6>
+                            <div class="thumbnail-gallery-container shadow-sm" style="border: 1px solid #eee; padding: 10px; background: #fafafa; min-height:70px; border-radius:4px;">
+                                ${thumbImgHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // ৯. মডালে ডেটা পুশ এবং শো করা
+        $('#previewContainer').html(previewHtml);
+        
+        // মেইন ইমেজের স্টাইল
+        $('.main-image-container img').css({
+            'max-width': '100%',
+            'max-height': '280px',
+            'object-fit': 'contain'
+        });
+
+        // CSS নিশ্চিত করা
+        $('#previewContainer').find('*').each(function(){
+            if($(this).css('color') === 'rgb(255, 255, 255)' && !$(this).hasClass('badge') && !$(this).hasClass('bg-dark')){
+                $(this).css('color', '#000');
+            }
+        });
+
+        $('#productPreviewModal').modal('show');
+    });
+});
 </script>
 @endsection

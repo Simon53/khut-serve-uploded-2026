@@ -12,44 +12,9 @@ use App\Http\Controllers\StockController;
 
 class ShopController extends Controller
 {
-   // ✅ Shop Page → সব product show করবে
-   /* public function index()
-        {
-            $mainMenus = MainMenu::with('subMenus.childMenus')->get();
-
-            $products = Product::where('published_site', 'Y')
-                ->orderByRaw("CASE WHEN stock_status = 'N' THEN 1 ELSE 0 END")
-                ->latest()
-                ->paginate(12);
-
         
-            $bannerRecord = CategoryBanner::inRandomOrder()->first();
-
-            if ($bannerRecord) {
-                // DB path full URL handle
-                if (str_starts_with($bannerRecord->banner_image, 'http')) {
-                    $bannerUrl = $bannerRecord->banner_image;
-                } else {
-                    $bannerUrl = asset('storage/' . $bannerRecord->banner_image);
-                }
-                $bannerTitle = $bannerRecord->title ?? 'Shop';
-            } else {
-                
-                $bannerUrl = asset('assets/images/product_banner.jpg');
-                $bannerTitle = 'Shop';
-            }
-
-            $category = (object)[
-                'name' => 'Shop',
-                'banner' => $bannerUrl,
-                'title' => $bannerTitle
-            ];
-
-            return view('product-categories.index', compact('mainMenus', 'products', 'category'));
-        }*/
             
-            
-       public function index()
+      /* public function index()
             {
                 $mainMenus = MainMenu::with('subMenus.childMenus')->get();
 
@@ -85,8 +50,75 @@ class ShopController extends Controller
                 );
 
                 return view('product-categories.index', compact('mainMenus', 'products', 'category', 'stocks'));
-            }
+            }*/
 
+    
+     public function index()
+{
+    $mainMenus = MainMenu::with('subMenus.childMenus')->get();
+
+    // ❌ আগে paginate করবা না
+    $products = Product::where('published_site', 'Y')
+        ->latest()
+        ->get(); // ✅ get()
+
+    // 🔥 Khut catalog
+    $khutCatalog = app(\App\Services\KhutCatalogService::class)->all();
+
+    // normalize barcode
+    $khutCatalogNorm = [];
+    foreach($khutCatalog as $barcode => $item) {
+        $khutCatalogNorm[ltrim((string)$barcode,'0')] = $item;
+    }
+
+    // ✅ SORT (in-stock first)
+    $sorted = $products->sortByDesc(function($product) use ($khutCatalogNorm) {
+
+        $barcode = $product->thumbnails->first()?->thumb_barcode 
+                ?: $product->product_barcode 
+                ?: null;
+
+        if (!$barcode) return 0;
+
+        $stock = (int)($khutCatalogNorm[ltrim($barcode,'0')]['stock'] ?? 0);
+
+        return $stock > 0 ? 1 : 0;
+    })->values();
+
+    // ✅ MANUAL PAGINATION
+    $currentPage = request()->get('page', 1);
+    $perPage = 50;
+
+    $products = new \Illuminate\Pagination\LengthAwarePaginator(
+        $sorted->forPage($currentPage, $perPage),
+        $sorted->count(),
+        $perPage,
+        $currentPage,
+        ['path' => request()->url()]
+    );
+
+    $products->appends(request()->query());
+
+    // ✅ Banner
+    $bannerRecord = CategoryBanner::inRandomOrder()->first();
+
+    if ($bannerRecord && !empty($bannerRecord->banner_image)) {
+        $cleanPath = preg_replace('#^/?storage/#', '', $bannerRecord->banner_image);
+        $bannerPath  = '/storage/' . $cleanPath;
+        $bannerTitle = $bannerRecord->title ?? 'Shop';
+    } else {
+        $bannerPath  = '/storage/category_banners/product_banner.jpg';
+        $bannerTitle = 'Shop';
+    }
+
+    $category = (object)[
+        'name'   => 'Shop',
+        'banner' => $bannerPath,
+        'title'  => $bannerTitle
+    ];
+
+    return view('product-categories.index', compact('mainMenus', 'products', 'category'));
+}
 
 
 

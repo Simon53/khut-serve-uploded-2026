@@ -65,13 +65,24 @@
          </div>
        <ul>
          @foreach($mainMenus as $menu)
+             @php
+                     $displayName = $menu->name;
+                     if ($menu->name === 'Hojoborolo') {
+                        $displayName = 'Ho-Jo-Bo-Ro-Lo';
+                     }
+
+                     // Display cosmetic fix: insert space around &
+                        if ($menu->name === 'Gifts&Crafts') {
+                              $displayName = 'Gifts & Crafts';
+                        }
+                  @endphp
             <li>
                   @if(strtolower($menu->name) === 'Patchwork')
-                        <a href="{{ route('home.patchwork') }}">{{ $menu->name }}</a>
+                        <a href="{{ route('home.patchwork') }}">{{ $displayName }}</a>
                    @elseif(strtolower($menu->name) === 'New Arrivals')
-                      <a href="{{ route('home.new-arrivals') }}">{{ $menu->name }}</a>
+                      <a href="{{ route('home.new-arrivals') }}">{{ $displayName }}</a>
                   @else
-                        <a href="{{ route('category.list', str_replace(' ', '-', $menu->name)) }}">{{ $menu->name }}</a>
+                        <a href="{{ route('category.list', str_replace(' ', '-', $menu->name)) }}">{{ $displayName }}</a>
                   @endif
             </li>
          @endforeach

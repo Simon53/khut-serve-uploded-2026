@@ -1,8 +1,23 @@
 @extends('layout.app')
-@section('title', 'Khut::Product Details')
+@section('meta')
+    @php
+        $baseImagePath = env('ADMIN_BASE_URL') . '/storage/';
+        $firstImage = $thumbnails->first()->image_path ?? 'default.png';
+        $fullImageUrl = $baseImagePath . $firstImage;
+    @endphp
+    <meta property="og:title" content="{{ $product->name_en }}">
+    <meta property="og:description" content="{{ strip_tags($product->details) }}">
+    <meta property="og:image" content="{{ $fullImageUrl }}">
+    <meta property="og:image:secure_url" content="{{ $fullImageUrl }}">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:type" content="product">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+@endsection
+
+@section('title', 'Khut :: ' . $product->name_en)
+
 @section('content')
-
-
 
 <style>
     .btn-outline-secondary{
@@ -13,6 +28,48 @@
 
     .barcode_hide{
         display:none;
+    }
+    /* ফেসবুক বাটন স্টাইল */
+    #fbShareBtn {
+        height: 38px;
+        width: 38px;
+        background-color: #424242; /* বক্স কালার */
+        border: none;
+        border-radius: 0px; /* রেডিয়াস ০ */
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        /* এটি নিশ্চিত করে যে ভেতরের এলিমেন্টটি বক্সকে ফুটো করে দেখাবে */
+        isolation: isolate; 
+    }
+
+    #fbShareBtn i {
+        display: block;
+        width: 14px; /* আইকন সাইজ সামান্য ছোট করা হয়েছে ব্যালেন্সের জন্য */
+        height: 18px;
+        background-color: #fff; /* এই রঙটিই কেটে গিয়ে ট্রান্সপারেন্ট হবে */
+        
+        /* ফেসবুকের 'f' আইকনের পাথ মাস্ক হিসেবে ব্যবহার */
+        -webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path d='M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z'/></svg>");
+        mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'><path d='M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z'/></svg>");
+        
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-size: contain;
+        mask-size: contain;
+        -webkit-mask-position: center;
+        mask-position: center;
+
+        /* জাদুর লাইন: এটি আইকনকে ট্রান্সপারেন্ট করে পেছনের বডি দেখাবে */
+        mix-blend-mode: destination-out;
+    }
+
+    /* হোভার ইফেক্ট বন্ধ রাখা হয়েছে আপনার রিকোয়েস্ট অনুযায়ী */
+    #fbShareBtn:hover {
+        background-color: #424242; 
+        cursor: pointer;
     }
 </style>
 
@@ -61,26 +118,32 @@
         <!-- Left Side: Text, Info, Add to Cart (Show after in mobile) -->
         <div class="col-lg-7 order-2 order-lg-1 productDetailBradcome">
             
-              <a href="{{ url('/') }}">Home</a>
-                @if($product->mainMenu)
-                    / <a href="{{ url('category/' . str_replace(' ', '-', strtolower($product->mainMenu->name))) }}">
-                        {{ $product->mainMenu->name }}
-                    </a>
-                @endif
-                
-                @if($product->subMenu)
-                    / <a href="{{ url('category/' . str_replace(' ', '-', strtolower($product->mainMenu->name))) }}">
-                        {{ $product->subMenu->name }}
-                    </a>
-                @endif
-                
-                @if($product->childMenu)
-                    / <a href="{{ url('category/' . str_replace(' ', '-', strtolower($product->mainMenu->name))) }}">
-                        {{ $product->childMenu->name }}
-                    </a>
-                @endif
+              
+                <a href="{{ url('/') }}">Home</a>
 
-                / <span>{{ $product->name_en }}</span>
+                    @if($product->mainMenu)
+                        /
+                        <a href="{{ url('category/' . $product->mainMenu->name) }}">
+                            {{ $product->mainMenu->name }}
+                        </a>
+                    @endif
+
+                    @if($product->subMenu)
+                        /
+                        <a href="{{ url('subcategory/' . $product->subMenu->id) }}">
+                            {{ $product->subMenu->name }}
+                        </a>
+                    @endif
+
+                    @if($product->childMenu)
+                        /
+                        <a href="{{ url('childcategory/' . $product->childMenu->id) }}">
+                            {{ $product->childMenu->name }}
+                        </a>
+                    @endif
+
+             / <span>{{ $product->name_en }}</span>
+                
             <div class="left-content padding-r">
                 <h1 class="mt-4">{{ $product->name_bn }}</h1>
                 <h2 class="mt-4">{{ $product->name_en }}</h2>
@@ -111,10 +174,8 @@
                     <p>Outside Dhaka: <span>5-7 working days.</span></p>
                 </div>
 
-                
-
                 <div class="deliveryInfo mt-4 aboutProduct">
-                    <b>Fabric care</b>
+                    <b>Care</b>
                     <p><span>
                     
                     @php
@@ -205,25 +266,36 @@
                     </span>
                 </div>
 
-
-            
+               @php
+                    $isExplore = $product->link_status === 'Explore';
+                @endphp
+                            
                 {{-- Add to Cart --}}
                 <div class="custom-btn d-flex bd-highlight mt-3 flex-wrap" style="width:73%">
+                     @if($isExplore)
                     <div class="bd-highlight flex-grow-1 custom-link mb-2 mb-sm-0 mobdetailbtn">
-                      <a class="addToCart btn-block btn-primary addToCartDetail " 
-                        id="addToCartBtn"
-                        data-id="{{ $product->id }}"
-                        data-name="{{ $product->name_en }}"
-                        data-price="{{ $product->sale_price ?? $product->price }}"
-                        data-tax-status="{{ $product->tax_status }}" 
-                        disabled>
-                        Add to Cart
-                      </a>
+                        <a class="addToCart btn-block btn-primary addToCartDetail">
+                            Available in Show Room
+                        </a>
                     </div>
+                @else
+                    <div class="bd-highlight flex-grow-1 custom-link mb-2 mb-sm-0 mobdetailbtn">
+                        <a class="addToCart btn-block btn-primary addToCartDetail" 
+                            id="addToCartBtn"
+                            data-id="{{ $product->id }}"
+                            data-name="{{ $product->name_en }}"
+                            data-price="{{ $product->sale_price ?? $product->price }}"
+                            data-tax-status="{{ $product->tax_status }}">
+                            Add to Cart
+                        </a>
+                    </div>
+                @endif
 
-                    <div class="bd-highlight mx-2 mb-2 mb-sm-0">
-                        <input type="number" id="quantityInput" value="1" min="1" class="form-control qty-input"/>
-                    </div>                        
+                   @if(!$isExplore)
+                        <div class="bd-highlight mx-2 mb-2 mb-sm-0">
+                            <input type="number" id="quantityInput" value="1" min="1" class="form-control qty-input"/>
+                        </div>
+                    @endif                     
 
                     <div class="bd-highlight mb-2 mb-sm-0">
                         <button id="wishBtn" class="wish-btn" 
@@ -235,15 +307,15 @@
                             <i class="far fa-heart"></i>
                         </button>
                     </div>
+
+                    <div class="bd-highlight mb-2 mb-sm-0 ml-2">
+                        <button id="fbShareBtn" title="Share on Facebook">
+                            <i></i> </button>
+                    </div>
                 </div>
-                
-              
-
-
-
-              
                
                <style>
+                  
                    .qty-input {
                     width: 70px;          /* Input ছোট হবে */
                     height: 38px;         /* Button height এর সাথে match */
@@ -354,31 +426,38 @@
                 </div>
 
                 <!-- Buttons -->
-                @if($inStock)
-                  <div class="custom-link d-flex align-items-center justify-content-between">
-
-                    @if($related->link_status == 'Add to Cart')
-                      <a class="addToCart"
-                         data-id="{{ $related->id }}"
-                         data-name="{{ $related->name_en }}"
-                         data-price="{{ $related->price }}"
-                         data-img="{{ $baseImagePath . $related->main_image }}"
-                         data-product-barcode="{{ $related->product_barcode }}">
-                         Add to Cart
-                      </a>
-
-                   @elseif($related->link_status == 'Read More')
-                        <a href="{{ route('product.details', $related->slug) }}">
-                            Select Option
+                <div class="custom-link d-flex align-items-center justify-content-between">
+                    @if($inStock)
+                        {{-- স্টক থাকলে আগের লজিক --}}
+                        @if($related->link_status == 'Add to Cart')
+                            <a class="addToCart"
+                                data-id="{{ $related->id }}"
+                                data-name="{{ $related->name_en }}"
+                                data-price="{{ $related->price }}"
+                                data-img="{{ $baseImagePath . $related->main_image }}"
+                                data-product-barcode="{{ $related->product_barcode }}">
+                                Add to Cart
+                            </a>
+                        @elseif($related->link_status == 'Read More')
+                            <a href="{{ route('product.details', $related->slug) }}">
+                                Select Option
+                            </a>
+                         @elseif($related->link_status == 'Explore')
+                            <a href="{{ route('product.details', $related->slug) }}">
+                                Explore
+                            </a>    
+                        @endif
+                    @else
+                        {{-- স্টক না থাকলে (Sold Out হলে) শুধু View বাটন দেখাবে --}}
+                        <a href="{{ route('product.details', $related->slug) }}" class="btn-view">
+                            View
                         </a>
                     @endif
-
+                
                     <button class="wish-btn">
-                      <i class="far fa-heart"></i>
+                        <i class="far fa-heart"></i>
                     </button>
-
-                  </div>
-                @endif
+                </div>
 
               </div>
             </div>
@@ -636,7 +715,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ===================== IMAGE ZOOM =====================
     $(document).ready(function () {
-        const zoomScale = 3.5;
+        const zoomScale = 2.5;
 
         $(".img-zoom-container").mousemove(function (e) {
             const img = $(this).find("img");
@@ -661,6 +740,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 "transform-origin": "center center"
             });
         });
+    });
+    
+    
+    
+    document.getElementById("fbShareBtn")?.addEventListener("click", function() {
+        const productUrl = window.location.href;
+        const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`;
+        window.open(fbUrl, '_blank', 'width=600,height=400');
     });
 
 });
@@ -693,6 +780,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 </script>
+
+
 
 
 @endsection

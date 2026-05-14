@@ -25,3 +25,5 @@
 [07-Feb-2026 06:15:45 UTC] SUCCESS METHOD CALLED: https://khut.shop/success?order_id=47
 [07-Feb-2026 08:22:55 UTC] SUCCESS METHOD CALLED: https://khut.shop/success?order_id=48
 [07-Feb-2026 09:33:04 UTC] SUCCESS METHOD CALLED: https://khut.shop/success?order_id=49
+[07-Apr-2026 15:22:42 UTC] PHP Fatal error:  Cannot use Illuminate\Support\Str as Str because the name is already in use in /home/khutshop/public_html/app/Http/Controllers/HomeController.php on line 16
+[07-Apr-2026 15:22:49 UTC] PHP Fatal error:  Cannot use Illuminate\Support\Str as Str because the name is already in use in /home/khutshop/public_html/app/Http/Controllers/HomeController.php on line 16

@@ -41,19 +41,19 @@
     <div class="row mb-4">
          <div class="col-md-3">
             <div class="card stat-card text-white p-3" style="background-color:#6a3434;">
-                <h5>Pending Delivery</h5>
+                <h5>Pending Confirmarion</h5>
                 <h3 id="deliveryPending">{{ $deliveryPending }}</h3>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card text-white p-3" style="background-color:#28a745;">
-                <h5>Confirmed</h5>
+                <h5>Completed Confirmarion</h5>
                 <h3 id="confirmedDelivery">{{ $confirmedDelivery }}</h3>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card stat-card bg-info text-white p-3">
-                <h5>Orders Delivered </h5>
+                <h5>Completed Delivery </h5>
                 <h3 id="deliveredOrders">{{ $deliveredOrders }}</h3>
             </div>
         </div>

@@ -22,6 +22,7 @@
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th>Image</th>
                         <th>Product</th>
                         <th>Size</th>
                         <th>Color</th>
@@ -34,6 +35,16 @@
                 <tbody>
                     @foreach($order->items as $item)
                     <tr>
+                         <td>
+                            @php
+                                $img = $item->product?->main_image
+                                    ? env('ADMIN_BASE_URL') . '/storage/' . $item->product->main_image
+                                    : asset('no-image.png');
+                            @endphp
+
+                            <img src="{{ $img }}"
+                                style="border-radius:4px; width:40px; height:auto">
+                        </td>
                         <td>{{ $item->product_name }}</td>
                         <td>{{ $item->size ?? '-' }}</td>
                         <td>{{ $item->color ?? '-' }}</td>
@@ -46,15 +57,15 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <th colspan="6" class="text-right">Subtotal</th>
+                        <th colspan="7" class="text-right">Subtotal</th>
                         <th>৳ {{ $order->subtotal }}</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-right">Delivery</th>
+                        <th colspan="7" class="text-right">Delivery</th>
                         <th>৳ {{ $order->delivery_charge }}</th>
                     </tr>
                     <tr>
-                        <th colspan="6" class="text-right">Total</th>
+                        <th colspan="7" class="text-right">Total</th>
                         <th>৳ {{ $order->total }}</th>
                     </tr>
                 </tfoot>

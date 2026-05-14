@@ -124,7 +124,7 @@
                 toastr.warning('common size name is required.');
                 return;
             }
-            $.post('/common-size/store', {common_size: commonSizeName}, function(res) {
+            $.post('https://khut.shop/bd-admin/public/common-size/store', {common_size: commonSizeName}, function(res) {
                 toastr.success(res.message);
                 $('#addcommonSizeModal').modal('hide');
                 $('#commonsizeInput').val('');

@@ -39,16 +39,22 @@
                            <div class="col-md-12 mt-3">
                               <label for="exampleInputUsername1">Link Options</label>
                            </div>   
-                           <div class="col-sm-6">
+                           <div class="col-sm-4">
                               <div class="form-check">
                                  <label class="form-check-label">
                                  <input type="radio" class="form-check-input" name="link_status" id="link_status" value="Add to Cart" > Add to Cart <i class="input-helper"></i></label>
                               </div>
                            </div>                           
-                           <div class="col-sm-6">
+                           <div class="col-sm-4">
                               <div class="form-check">
                                  <label class="form-check-label">
                                  <input type="radio" class="form-check-input" name="link_status" id="link_status" value="Read More"> Read More <i class="input-helper"></i></label>
+                              </div>
+                           </div>
+                           <div class="col-sm-4">
+                              <div class="form-check">
+                                 <label class="form-check-label">
+                                 <input type="radio" class="form-check-input" name="link_status" id="link_status" value="Explore"> Explore <i class="input-helper"></i></label>
                               </div>
                            </div>
 
@@ -71,7 +77,7 @@
                            <div class="col-sm-3">
                               <div class="form-check">
                                  <label class="form-check-label">
-                                    <input type="checkbox" class="form-check-input" name="festive_collection" id="festive_collection" value="fastive-collection"> Festive Collection <i class="input-helper"></i></label>
+                                    <input type="checkbox" class="form-check-input" name="festive_collection" id="festive_collection" value="Y"> Festive Collection <i class="input-helper"></i></label>
                                </div>
                            </div>
 
@@ -176,7 +182,7 @@
                            
 
                            <div class=" col-md-12 text-center">
-                              <a href="#" class="btn btn-info openImageModal" data-target="#mainImage">+ Choose Image</a>
+                              <a href="#" class="btn btn-info btn-lg openImageModal" data-target="#mainImage">+ Choose Image</a>
                            </div>
                            <div class="col-lg-12 mt-2">
                               <input type="hidden" name="main_image" id="mainImage">
@@ -524,7 +530,8 @@
          </div>
       </div>
       <div class="col-md-12 text-center">
-         <button type="button" class="btn btn-primary btn-lg" id="submitProductBtn">Submit</button>
+         <button type="button" class="btn btn-success btn-lg" id="submitProductBtn">Submit</button>
+         <button type="button" class="btn btn-success btn-lg" id="btnPreview">Preview Product</button>
       </div>
    </div>
 </div>
@@ -674,6 +681,23 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="productPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border: 2px solid #000;">
+            <div class="modal-header" style="background: #fff; border-bottom: 1px solid #000;">
+                <h5 class="modal-title" style="color: #000; font-weight: bold;">Full Product Preview</h5>
+                <button type="button" class="close" data-dismiss="modal" style="color: #000;"><span>&times;</span></button>
+            </div>
+            <div class="modal-body" id="previewContainer" style="background: #fff;">
+                </div>
+            <div class="modal-footer" style="border-top: 1px solid #000;">
+                <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection  
 @section('script')
 
@@ -753,6 +777,7 @@
     });
 
     $(document).ready(function () {
+      // рж╕ржм radio button-ржПрж░ ржЬржирзНржп ржХрж╛ржЬ ржХрж░ржмрзЗ
       $('input[type="radio"]').click(function () {
          let $this = $(this);
 
@@ -876,7 +901,7 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
     let images = currentVal ? currentVal.split(',') : [];
     if (!images.includes(relativePath)) {
         images.push(relativePath);
-        hiddenInput.val(images.join(',')); 
+        hiddenInput.val(images.join(',')); // DB-তে যাবে শুধুই gallery/filename.jpg
     }
 }
 
@@ -891,6 +916,8 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
    });
 
 
+
+   
    
    //main image selection from gallery
   $(document).on('click', '.gallery-image', function () {
@@ -908,6 +935,9 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
         $(this).toggleClass('selected');
     }
 });
+
+
+
 
 
    // ========== Local Upload (thumbnail) ==========
@@ -945,6 +975,8 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
    });
 
 
+
+
    $('#selectFromLocal').on('click', function () {
       $('#thumbnailUploadOptionModal').modal('hide');
       $('#imageSelectModal').modal('hide');
@@ -970,6 +1002,12 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
 
+
+  
+   
+   
+   
+   
    //=======================thamneil select from local device================
    $('#localThumbnailInput').on('change', function () {
     const files = this.files;
@@ -1003,6 +1041,11 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
    
+   
+
+
+
+
    
     // ========== Main Image Upload local divice ==========
     $('#imageUploadForm').on('submit', function (e) {
@@ -1163,4 +1206,179 @@ $('#useSelectedImages, #confirmGallerySelection').on('click', function () {
 });
 
 </script>
+
+
+<script>
+$(document).ready(function() {
+    $('#btnPreview').on('click', function() {
+        // ১. Basic Info
+        let nameEn = $('#nameEn').val() || 'N/A';
+        let nameBn = $('#nameBn').val() || 'N/A';
+        let price = $('#price').val() || '0.00';
+        let salePrice = $('#sale_price').val() || '0.00';
+        let productBarcode = $('#product_barcode').val() || '0.00';
+
+        // ২. Category Logic
+        let mainCat = $('#mainMenuSelect option:selected').text();
+        let subCat = $('#subMenuSelect option:selected').text();
+        let childCat = $('#childMenuSelect option:selected').text();
+        let fullCategory = "";
+        if(mainCat && mainCat !== "Select Main Menu") fullCategory += mainCat;
+        if(subCat && subCat !== "Select Sub Menu") fullCategory += " > " + subCat;
+        if(childCat && childCat !== "Select Child Menu") fullCategory += " > " + childCat;
+        if(!fullCategory) fullCategory = "Not Selected";
+
+        // ৩. Multi-select Data (Size, Color, Wash, etc.)
+        let getCheckedValues = (name) => {
+            let values = [];
+            $(`input[name='${name}']:checked`).each(function() {
+                values.push($(this).closest('.form-check').text().trim() || $(this).parent().text().trim());
+            });
+            return values.length > 0 ? values.join(', ') : 'Not Selected';
+        };
+
+        let selectedSizes = getCheckedValues('body_sizes[]');
+        let selectedColors = getCheckedValues('colors[]');
+        let selectedWash = getCheckedValues('statuses[]');
+        let selectedDryWash = getCheckedValues('dry_washes[]');
+        let selectedIron = getCheckedValues('irons[]');
+
+        // ৪. Single Options (Link & Feature)
+        let linkStatus = $("input[name='link_status']:checked").val() || 'None';
+        let feature = $("input[name='feature']:checked").val() || 'None';
+
+        // ৫. View Status Checkboxes
+        let statuses = [];
+        if($('#site_view_status').is(':checked')) statuses.push("Show Home");
+        if($('#published_site').is(':checked')) statuses.push("Published");
+        if($('#festive_collection').is(':checked')) statuses.push("Festive Collection");
+        if($('#new_arrivals').is(':checked')) statuses.push("New Arrivals");
+        let viewStatusText = statuses.length > 0 ? statuses.join(', ') : 'None';
+
+        // ৬. Images (Main Image)
+        let mainImgHtml = $('#mainImagePreview').html() || '<p style="color:red">No Main Image Selected</p>';
+        
+        // --- ৬.১ থাম্বনেইল গ্যালারি লজিক (Updated) ---
+        let thumbImgHtml = '';
+        if ($('.thumbnail-wrapper').length > 0) {
+            $('.thumbnail-wrapper').each(function() {
+                let imgSrc = $(this).find('img').attr('src');
+                let colorName = $(this).find('.color-select option:selected').text() || 'N/A';
+                let bCode = $(this).find('.barcode-input').val() || 'N/A';
+
+                thumbImgHtml += `
+                    <div style="width: 100%; border-bottom: 1px solid #eee; padding: 10px 0; display: flex; align-items: center; gap: 15px;">
+                        <img src="${imgSrc}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                        <div style="font-size: 12px; color: #333;">
+                            <strong>Color:</strong> ${colorName} <br>
+                            <strong>Barcode:</strong> ${bCode}
+                        </div>
+                    </div>
+                `;
+            });
+        } else {
+            thumbImgHtml = '<p style="color:red; font-size:12px; padding:10px;">No Thumbnails Selected</p>';
+        }
+
+        // ৭. CKEditor Data Fix
+       let productDetails = "";
+        if (typeof tinymce !== "undefined" && tinymce.get('productDetailsEditor')) {
+            productDetails = tinymce.get('productDetailsEditor').getContent();
+        } else {
+            productDetails = $('#productDetailsEditor').val();
+        }
+
+        if (!productDetails || productDetails.trim() === "" || productDetails === "<p>&nbsp;</p>") {
+            productDetails = '<span style="color:red">No details entered yet.</span>';
+        }
+
+        // ৮. Preview HTML Template
+        let previewHtml = `
+            <div style="color: #000 !important; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.5; font-size:14px;">
+                <div class="row">
+                    <div class="col-md-7 border-right">
+                        <div class="pb-2 border-bottom mb-3">
+                            <h3 style="color:#000; font-weight:bold; margin:0 0 5px 0;">${nameEn}</h3>
+                            <h5 style="color:#555; margin:0 0 10px 0; font-weight:normal;">${nameBn}</h5>
+                            <p style="margin-bottom:8px;"><strong>Category:</strong> <span class="text-info" style="font-weight:bold;">${fullCategory}</span></p>
+                            <div style="display:flex; gap:5px; flex-wrap:wrap;">
+                                <span class="badge badge-success">Link Status: ${linkStatus}</span>
+                                <span class="badge badge-primary">Feature: ${feature}</span>
+                                <span class="badge badge-info">View Status: ${viewStatusText}</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 style="font-weight:bold; color:#333; text-transform:uppercase; font-size:12px; letter-spacing:1px; margin-bottom:10px;">Pricing & Variants</h6>
+                            <table class="table table-sm table-striped table-bordered" style="font-size:13px;">
+                                <tbody>
+                                    <tr> <td style="width:40%;"><strong>Main Barcode</strong></td> <td style="color:#d9534f; font-weight:bold;">${productBarcode}</td> </tr>
+                                    <tr> <td style="width:40%;"><strong>Regular Price</strong></td> <td style="color:#d9534f; font-weight:bold;">৳ ${price}</td> </tr>
+                                    <tr> <td><strong>Sale Price</strong></td> <td style="color:#5cb85c; font-weight:bold;">৳ ${salePrice}</td> </tr>
+                                    <tr> <td><strong>Available Sizes</strong></td> <td>${selectedSizes}</td> </tr>
+                                    <tr> <td><strong>Available Colors</strong></td> <td>${selectedColors}</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mb-3">
+                            <h6 style="font-weight:bold; color:#333; text-transform:uppercase; font-size:12px; letter-spacing:1px; margin-bottom:10px;">Product Care</h6>
+                            <table class="table table-sm table-striped table-bordered" style="font-size:13px;">
+                                <tbody>
+                                    <tr> <td style="width:40%;"><strong>Wash Type</strong></td> <td>${selectedWash}</td> </tr>
+                                    <tr> <td><strong>Dry Wash</strong></td> <td>${selectedDryWash}</td> </tr>
+                                    <tr> <td><strong>Iron Status</strong></td> <td>${selectedIron}</td> </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-12 mt-4 pt-3 border-top">
+                              <h5 class="bg-dark text-white p-2" style="border-radius:4px 4px 0 0; margin-bottom:0;">About Product Details</h5>
+                              <div class="preview-content-box" style="border: 1px solid #ccc; border-top:none; padding: 15px; background: #fff; min-height: 120px; max-height:300px; overflow-y: auto; border-radius:0 0 4px 4px; font-size:13px;">
+                                 ${productDetails}
+                              </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-5">
+                        <div style="margin-bottom:20px; text-center">
+                            <h6 style="font-weight:bold; color:#333; text-align:center; margin-bottom:10px;">Main Product Image</h6>
+                            <div class="main-image-container" style="border: 2px solid #ddd; padding: 5px; background: #fff; border-radius:4px; min-height: 250px; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                                ${mainImgHtml}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h6 style="font-weight:bold; color:#333; margin-bottom:10px;">Thumbnail Gallery (Variants)</h6>
+                            <div class="thumbnail-gallery-container shadow-sm" style="border: 1px solid #eee; padding: 10px; background: #fafafa; min-height:70px; border-radius:4px;">
+                                ${thumbImgHtml}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // ৯. মডালে ডেটা পুশ এবং শো করা
+        $('#previewContainer').html(previewHtml);
+        
+        // মেইন ইমেজের স্টাইল
+        $('.main-image-container img').css({
+            'max-width': '100%',
+            'max-height': '280px',
+            'object-fit': 'contain'
+        });
+
+        // CSS নিশ্চিত করা
+        $('#previewContainer').find('*').each(function(){
+            if($(this).css('color') === 'rgb(255, 255, 255)' && !$(this).hasClass('badge') && !$(this).hasClass('bg-dark')){
+                $(this).css('color', '#000');
+            }
+        });
+
+        $('#productPreviewModal').modal('show');
+    });
+});
+</script>
+
 @endsection

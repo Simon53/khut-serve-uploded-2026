@@ -2,7 +2,7 @@
 <html lang="en">
   @include('layout.header')
   <body>
-    <div class="container-scroller">
+    <div class="container-scroller" style="background: url('{{ asset('images/auth/Login_bg.jpg') }}'); background-size: cover;">
       <!-- partial:partials/_sidebar.html -->
      @include('layout.sidebar')
       <!-- partial -->

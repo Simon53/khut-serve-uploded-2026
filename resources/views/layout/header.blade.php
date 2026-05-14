@@ -4,6 +4,7 @@
       <meta name="description" content="">
       <meta name="author" content="">
       <title>@yield('title')</title>
+       @yield('meta')
       <link rel="icon" type="image/x-icon" href="{{asset('/images/favicon.ico')}}">
       <!-- Additional CSS Files -->
     

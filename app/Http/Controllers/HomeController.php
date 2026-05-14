@@ -17,6 +17,7 @@ use App\Models\KhutStory;
 
 class HomeController extends Controller
 {
+    
     public function index(Request $request)
     {
         VisitorTable::create([
@@ -79,7 +80,7 @@ class HomeController extends Controller
             ->where('published_site', 'Y')
             ->where('site_view_status', 'Y')
             ->latest()
-            ->take(6)
+            ->take(12)
             ->get();
 
         $featureProduct = Product::with(['childMenu', 'subMenu', 'mainMenu'])
@@ -105,7 +106,7 @@ class HomeController extends Controller
         $ArtGellery = Product::where('bottom_fastive', 'art-gallery')
             ->where('published_site', 'Y')
             ->where('site_view_status', 'Y')
-            ->take(10)
+            ->take(12)
             ->get();
 
         $stories = KhutStory::where('is_active', 'Y')
@@ -201,8 +202,9 @@ public function patchworkProducts()
     $products = \App\Models\Product::where('patchwork', 'Y')
         ->where('published_site', 'Y')
         ->where('site_view_status', 'Y')
-        ->latest()
-        ->paginate(12);
+        ->reorder()             
+        ->orderByDesc('id')
+        ->paginate(50);
 
     $mainMenus = \App\Models\MainMenu::with('subMenus.childMenus')->get();
 
@@ -250,8 +252,9 @@ public function patchworkProducts()
                 $products = \App\Models\Product::where('new_arrivals', 'Y')
                     ->where('published_site', 'Y')
                     ->where('site_view_status', 'Y')
-                    ->latest()
-                    ->paginate(12);
+                    ->reorder()             
+                    ->orderByDesc('id')
+                    ->paginate(50);
 
                 $mainMenus = \App\Models\MainMenu::with('subMenus.childMenus')->get();
 
@@ -289,6 +292,9 @@ public function patchworkProducts()
                     compact('products', 'mainMenus', 'category', 'stocks')
                 )->with('activeMenu', 'New Arrivals');
             }
+            
+            
+            
 
 
 

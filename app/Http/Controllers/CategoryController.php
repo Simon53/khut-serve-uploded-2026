@@ -19,7 +19,7 @@ class CategoryController extends Controller
     {
         $products = Product::where('published_site', 'Y')
             ->reorder()
-            ->orderByDesc('id') // ✅ latest first নিশ্চিত
+            ->orderByDesc('id')
             ->paginate(50);
 
         $stocks = [];
@@ -36,8 +36,7 @@ class CategoryController extends Controller
         return view('product-categories.partials.products', compact('products', 'stocks'));
     }
 
-    public function categoryProducts($id)
-    {
+    public function categoryProducts($id){
         $products = Product::with(['mainMenu', 'subMenu', 'childMenu'])
             ->where('published_site', 'Y')
             ->where(function ($q) use ($id) {
@@ -46,86 +45,77 @@ class CategoryController extends Controller
                   ->orWhere('child_menu_id', $id);
             })
             ->reorder()
-            ->orderByDesc('id') // ✅
+            ->orderByDesc('id')
             ->paginate(50);
 
         return view('product-categories.index', compact('products'));
     }
 
-    public function listBySlug($slug)
-    {
+    public function listBySlug($slug){
         $mainMenus = MainMenu::with('subMenus.childMenus')->get();
-
-        // ✅ NEW ARRIVALS
-        if ($slug === 'New-Arrivals') {
-
+    
+        // Banner
+        $banner = CategoryBanner::first();
+        $bannerPath = $banner && !empty($banner->banner_image)
+            ? '/storage/' . ltrim(preg_replace('#^https?://[^/]+/#', '', preg_replace('#^/?storage/#', '', $banner->banner_image)), '/')
+            : '/storage/category_banners/product_banner.jpg';
+    
+        if (strtolower($slug) === 'new-arrivals') {
             $products = Product::where('new_arrivals', 'Y')
                 ->where('published_site', 'Y')
-                ->reorder()
-                ->orderByDesc('id') // ✅
+                ->where('site_view_status', 'Y')
+                ->reorder()            
+                ->orderByDesc('id')
                 ->paginate(50);
-
-            $banner = CategoryBanner::latest()->first();
-
-            $catalog = app(KhutCatalogService::class)->all();
-            $stocks = [];
-
-            foreach ($products as $product) {
-                $sku = trim((string)($product->product_barcode ?? ''));
-                if ($sku === '') continue;
-
-                $stocks[$sku] = (int)($catalog[$sku]['stock'] ?? 0);
-            }
-
-            return view('product-categories.index', compact(
-                'mainMenus',
-                'products',
-                'banner',
-                'stocks'
-            ));
+    
+            $category = (object)[
+                'name' => 'New Arrivals',
+                'title' => 'New Arrivals',
+                'banner' => $bannerPath
+            ];
+    
+            return view('product-categories.new-arrivals', compact('products', 'mainMenus', 'category'));
+    
+        } elseif (strtolower($slug) === 'patchwork') {
+            $products = Product::where('patchwork', 'Y')
+                ->where('published_site', 'Y')
+                ->where('site_view_status', 'Y')
+                ->reorder()            
+                ->orderByDesc('id')
+                ->paginate(50);
+    
+            $category = (object)[
+                'name' => 'Patchwork',
+                'title' => 'Patchwork',
+                'banner' => $bannerPath
+            ];
+    
+            return view('product-categories.patchwork', compact('products', 'mainMenus', 'category'));
         }
-
-        // NORMAL CATEGORY
+    
+        // Normal category slug
         $normalizedSlug = strtolower($slug);
-
         $category = $mainMenus->first(function ($menu) use ($normalizedSlug) {
             return strtolower(str_replace(' ', '-', $menu->name)) === $normalizedSlug;
         });
-
-        if (!$category) abort(404, 'Category not found');
-
+    
+        if (!$category) abort(404);
+    
         $subIds   = $category->subMenus->pluck('id')->toArray();
         $childIds = ChildMenu::whereIn('sub_menu_id', $subIds)->pluck('id')->toArray();
-
+    
         $products = Product::where('published_site', 'Y')
             ->where(function ($q) use ($category, $subIds, $childIds) {
                 $q->where('main_menu_id', $category->id)
                   ->orWhereIn('sub_menu_id', $subIds)
                   ->orWhereIn('child_menu_id', $childIds);
             })
-            ->reorder()
-            ->orderByDesc('id') // ✅
+            ->orderBy('id', 'desc')
             ->paginate(50);
-
-        $banner = CategoryBanner::where('main_menu_id', $category->id)->first();
-
-        $catalog = app(KhutCatalogService::class)->all();
-        $stocks = [];
-
-        foreach ($products as $product) {
-            $sku = trim((string)($product->product_barcode ?? ''));
-            if ($sku === '') continue;
-
-            $stocks[$sku] = (int)($catalog[$sku]['stock'] ?? 0);
-        }
-
-        return view('product-categories.index', compact(
-            'mainMenus',
-            'products',
-            'category',
-            'banner',
-            'stocks'
-        ));
+    
+        $category->banner = $bannerPath;
+    
+        return view('product-categories.index', compact('products', 'mainMenus', 'category'));
     }
 
     public function listById($id)
@@ -145,20 +135,27 @@ class CategoryController extends Controller
                       ->orWhereIn('child_menu_id', $childIds);
                 })
                 ->reorder()
-                ->orderByDesc('id') // ✅
+                ->orderBy('id', 'desc')
                 ->paginate(50);
 
             $banner = CategoryBanner::where('main_menu_id', $category->main_menu_id)->first();
 
-            $catalog = app(KhutCatalogService::class)->all();
-            $stocks = [];
+            // ✅ FIX START
+            $catalogRaw = app(KhutCatalogService::class)->all();
+            $catalog = [];
+            foreach ($catalogRaw as $barcode => $item) {
+                $catalog[ltrim((string)$barcode, '0')] = $item;
+            }
 
+            $stocks = [];
             foreach ($products as $product) {
                 $sku = trim((string)($product->product_barcode ?? ''));
                 if ($sku === '') continue;
 
-                $stocks[$sku] = (int)($catalog[$sku]['stock'] ?? 0);
+                $skuNorm = ltrim($sku, '0');
+                $stocks[$sku] = (int)($catalog[$skuNorm]['stock'] ?? 0);
             }
+            // ✅ FIX END
 
             return view('product-categories.index', compact(
                 'mainMenus',
@@ -177,7 +174,7 @@ class CategoryController extends Controller
             $products = Product::where('published_site', 'Y')
                 ->where('child_menu_id', $id)
                 ->reorder()
-                ->orderByDesc('id') // ✅
+                ->orderByDesc('id')
                 ->paginate(50);
 
             $subMenu  = $childMenu->subMenu;
@@ -190,15 +187,22 @@ class CategoryController extends Controller
                     'title' => $childMenu->name
                 ];
 
-            $catalog = app(KhutCatalogService::class)->all();
-            $stocks = [];
+            // ✅ FIX START
+            $catalogRaw = app(KhutCatalogService::class)->all();
+            $catalog = [];
+            foreach ($catalogRaw as $barcode => $item) {
+                $catalog[ltrim((string)$barcode, '0')] = $item;
+            }
 
+            $stocks = [];
             foreach ($products as $product) {
                 $sku = trim((string)($product->product_barcode ?? ''));
                 if ($sku === '') continue;
 
-                $stocks[$sku] = (int)($catalog[$sku]['stock'] ?? 0);
+                $skuNorm = ltrim($sku, '0');
+                $stocks[$sku] = (int)($catalog[$skuNorm]['stock'] ?? 0);
             }
+            // ✅ FIX END
 
             return view('product-categories.index', compact(
                 'mainMenus',
@@ -221,7 +225,7 @@ class CategoryController extends Controller
         $products = Product::where('published_site', 'Y')
             ->where('main_menu_id', $mainMenu->id)
             ->reorder()
-            ->orderByDesc('id') // ✅
+            ->orderByDesc('id')
             ->paginate(50);
 
         return view('category.index', compact('products', 'mainMenu'));

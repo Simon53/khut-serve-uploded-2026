@@ -1,41 +1,27 @@
 @php
+    // API catalog
     $khutCatalog = app(\App\Services\KhutCatalogService::class)->all();
 
-    
+    // Normalize barcode keys
     $khutCatalogNorm = [];
     foreach($khutCatalog as $barcode => $item) {
         $khutCatalogNorm[ltrim((string)$barcode,'0')] = $item;
     }
 
-    
-   $collection = $products->getCollection();
+    // Filter products: only keep those with a barcode or at least one thumbnail barcode
+    $productsWithBarcode = $products->getCollection()->filter(function($product) {
+        return $product->product_barcode || $product->thumbnails->first()?->thumb_barcode;
+    });
 
-// আলাদা করি
-$inStockItems = $collection->filter(function($product) use ($khutCatalogNorm) {
-    $barcode = $product->thumbnails->first()?->thumb_barcode 
-              ?: $product->product_barcode 
-              ?: null;
-
-    if (!$barcode) return false;
-
-    $stock = (int)($khutCatalogNorm[ltrim($barcode,'0')]['stock'] ?? 0);
-    return $stock > 0;
-});
-
-$soldOutItems = $collection->filter(function($product) use ($khutCatalogNorm) {
-    $barcode = $product->thumbnails->first()?->thumb_barcode 
-              ?: $product->product_barcode 
-              ?: null;
-
-    if (!$barcode) return true;
-
-    $stock = (int)($khutCatalogNorm[ltrim($barcode,'0')]['stock'] ?? 0);
-    return $stock <= 0;
-});
-
-// merge → in stock আগে
-$sorted = $inStockItems->values()->merge($soldOutItems->values());
-
+    // Sort: in-stock first
+    $sorted = $productsWithBarcode->sortBy(function ($product) use ($khutCatalogNorm) {
+        $primaryBarcode = $product->thumbnails->first()?->thumb_barcode 
+                        ?: $product->product_barcode 
+                        ?: null;
+        $primaryBarcodeNorm = $primaryBarcode ? ltrim($primaryBarcode,'0') : null;
+        $apiStock = $primaryBarcodeNorm ? (int)($khutCatalogNorm[$primaryBarcodeNorm]['stock'] ?? 0) : 0;
+        return $apiStock > 0 ? 0 : 1;
+    });
 
     $products->setCollection($sorted);
 @endphp
@@ -104,48 +90,21 @@ $sorted = $inStockItems->values()->merge($soldOutItems->values());
     
     
 @foreach($products as $product)
-   @php
-          $allBarcodes = [];
+    @php
+        $primaryBarcode = $product->thumbnails->first()?->thumb_barcode 
+                        ?: $product->product_barcode 
+                        ?: null;
 
-        // Main product barcode
-        if (!empty($product->product_barcode)) {
-            $allBarcodes[] = $product->product_barcode;
+        // Skip products without barcode
+        if (!$primaryBarcode) {
+            continue;
         }
 
-        // Thumbnail barcodes
-        foreach ($product->thumbnails as $thumb) {
-            if (!empty($thumb->thumb_barcode)) {
-                $allBarcodes[] = $thumb->thumb_barcode;
-            }
-        }
-
-        // Option barcodes
-        foreach ($product->options as $option) {
-            if (!empty($option->barcode)) {
-                $allBarcodes[] = $option->barcode;
-            }
-        }
-
-        // Duplicate remove
-        $allBarcodes = array_unique($allBarcodes);
-
-        // Default sold out
-        $inStock = false;
-
-        foreach ($allBarcodes as $barcode) {
-
-            $barcodeNorm = ltrim($barcode, '0');
-
-            $stock = (int)($khutCatalogNorm[$barcodeNorm]['stock'] ?? 0);
-
-            if ($stock > 0) {
-                $inStock = true;
-                break;
-            }
-        }
+        $primaryBarcodeNorm = ltrim($primaryBarcode,'0');
+        $apiStock = (int)($khutCatalogNorm[$primaryBarcodeNorm]['stock'] ?? 0);
+        $inStock = $apiStock > 0;
     @endphp
-
-      @if(!$inStock && request()->get('page', 1) == 1)
+  @if(!$inStock && request()->get('page', 1) == 1)
         @continue
     @endif
 
@@ -153,7 +112,7 @@ $sorted = $inStockItems->values()->merge($soldOutItems->values());
          data-price="{{ $product->price }}"
          data-sku="{{ $product->product_barcode }}">
 
-        {{-- IMAGE --}}
+       {{-- IMAGE --}}
         <div class="image-wrapper position-relative">
 
             {{-- IMAGE (details link only here) --}}
@@ -218,7 +177,7 @@ $sorted = $inStockItems->values()->merge($soldOutItems->values());
                         <a href="{{ route('product.details', $product->slug) }}"
                            style="padding:4px 18px">
                            Explore
-                        </a>     
+                        </a>    
                     @endif
                 @endif
             
@@ -233,10 +192,7 @@ $sorted = $inStockItems->values()->merge($soldOutItems->values());
             
             </div>
     </div>
-    
 @endforeach
-
-
 </div>
 
 {{-- Pagination --}}

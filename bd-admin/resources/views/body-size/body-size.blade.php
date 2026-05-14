@@ -118,6 +118,8 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+        
+        const basePath = '/bd-admin/public';
 
         // Add BodySize
         $('#addBodySizeBtn').click(function () {
@@ -126,7 +128,7 @@
                 toastr.warning('Body size name is required.');
                 return;
             }
-            $.post('/body-size/store', {body_size: bodySizeName}, function(res) {
+            $.post('https://khut.shop/bd-admin/public/body-size/store', {body_size: bodySizeName}, function(res) {
                 toastr.success(res.message);
                 $('#addBodySizeModal').modal('hide');
                 $('#bodysizeInput').val('');

@@ -1,10 +1,6 @@
 @extends('layout.app')
-@section('title', $displayType . ' Products')
+@section('title', $category->name ?? 'Products')
 @section('content')
-
-@php
-    $baseImagePath = 'https://dev.khut.shop/khut-bd-admin/public/storage/';
-@endphp
 
 <style>
     .innerBanner h1 {
@@ -13,15 +9,52 @@
     .bradcum-category {
         margin-top: -10px;
     }
-    .product-card img {
-        width: 190px;
-        height: 190px;
-        object-fit: cover;
-        object-position: center;
-        border-radius: 8px;
-        background-color: #f8f8f8;
-    }
 </style>
+
+
+
+@php
+    $baseImagePath = rtrim(env('ADMIN_BASE_URL'), '/') . '/storage/';
+    
+    // Path calculation
+    $dbPath = $category->banner ?? '';
+    $cleanPath = ltrim(preg_replace('#^/?storage/#', '', $dbPath), '/');
+    
+    // Final URL Build
+    if (!empty($cleanPath) && $cleanPath !== 'category_banners/product_banner.jpg') {
+        $bannerUrl = rtrim(env('ADMIN_BASE_URL'), '/') . '/storage/' . $cleanPath;
+    } else {
+        $bannerUrl = asset('assets/images/product_banner.jpg');
+    }
+
+    $bannerTitle = $displayType ?? $category->name ?? 'Products';
+@endphp
+
+<div class="innerBanner">
+    <img src="{{ $bannerUrl }}" 
+         class="img-fluid img-resize-banner banner-animate" 
+         alt="{{ $bannerTitle }}">
+    
+    <div class="ribon"></div>
+    <div class="banner-overlay"></div>
+ 
+    <div class="d-flex justify-content-center position-absolute w-100 top-50 start-50 translate-middle">
+        <h1 class="text-white">{{ $bannerTitle }}</h1>
+    </div>
+
+    <div class="container mt-2">
+        <div class="bradcum-category">
+            <a href="{{ url('/') }}">Home</a> / 
+            <span>{{ $bannerTitle }}</span>
+        </div>
+    </div>
+</div>
+<!-- ===== Banner Section End ===== -->
+
+
+
+
+
 
 <div class="container my-4">
     <!-- Filter Button (Mobile Only) -->
@@ -46,10 +79,24 @@
             </div>
 
             <!--h2 class="product-title mb-3">Product Category</h2-->
+
+            <!-- Vertical Categorxb fy Tree -->
             <ul class="nav flex-column nav-pills">
                 @foreach($mainMenus as $main)
-                    <li class="nav-item">
-                        <a class="nav-link main-menu-tab" href="{{ url('category/' . str_replace(' ', '-', $main->name)) }}">
+                    @php
+                        // Default: menu name 그대로
+                        $mainUrlName = $main->name;
+
+                        // Special case: New Arrivals
+                        if (strtolower($main->name) === 'new arrivals') {
+                            $mainUrlName = 'New-Arrivals';
+                        }
+                    @endphp
+
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link main-menu-tab
+                        {{ request()->is('category/'.$mainUrlName) ? 'active-menu' : '' }}"
+                        href="{{ url('category/'.$mainUrlName) }}">
                             {{ $main->name }}
                         </a>
 
@@ -57,7 +104,9 @@
                             <ul class="nav flex-column ms-3 mt-1">
                                 @foreach($main->subMenus as $sub)
                                     <li class="nav-item">
-                                        <a class="nav-link sub-menu-tab" href="{{ url('subcategory/'.$sub->id) }}">
+                                        <a class="nav-link sub-menu-tab
+                                        {{ request()->is('subcategory/'.$sub->id) ? 'active-menu' : '' }}"
+                                        href="{{ url('subcategory/'.$sub->id) }}">
                                             {{ $sub->name }}
                                         </a>
 
@@ -65,7 +114,9 @@
                                             <ul class="nav flex-column ms-3 mt-1">
                                                 @foreach($sub->childMenus as $child)
                                                     <li class="nav-item">
-                                                        <a class="nav-link child-menu-tab" href="{{ url('childcategory/'.$child->id) }}">
+                                                        <a class="nav-link child-menu-tab
+                                                        {{ request()->is('childcategory/'.$child->id) ? 'active-menu' : '' }}"
+                                                        href="{{ url('childcategory/'.$child->id) }}">
                                                             {{ $child->name }}
                                                         </a>
                                                     </li>
@@ -78,52 +129,19 @@
                         @endif
                     </li>
                 @endforeach
+
             </ul> 
         </div>
 
         <!-- Product Grid -->
-        <div class="col-lg-9">
-            <h1 class="mb-4" style="display:none;">{{ $displayType }} Products</h1>
-
+        <div class="col-lg-9" style="padding-right: 0;">
+            
             <div class="row" id="product-list">
-               @foreach($products as $product)
-                    <div class="col-lg-3 col-md-6 col-6 hozoboro-text productListName productportraitListDiv padding-custom-mobile product-card"
-                        data-price="{{ $product->price }}">
-                        <a href="{{ route('product.details', $product->slug) }}">
-                            <img src="{{ $baseImagePath . $product->main_image }}" alt="{{ $product->name_en }}"
-                                class="img-fluid img-alllist-resize">
-                    
-                            @if($product->stock_status == 'N')
-                                <div class="sold-out">Sold Out</div>
-                            @endif
-                        </a>
-                    
-                        <div class="nameProduct">
-                            <a href="{{ route('product.details', $product->slug) }}"><p>{{ $product->name_en }}</p></a>
-                            <h4>BDT {{ $product->price }} .VAT &nbsp;&nbsp; <span>{{ $product->sale_price }}</span></h4>
-                        </div>
-                    
-                        @if($product->stock_status != 'N')
-                            <div class="custom-link d-flex align-items-center justify-content-between">
-                                @if($product->link_status == 'Add to Cart')
-                                    <a class="addToCart"
-                                       data-id="{{ $product->id }}"
-                                       data-name="{{ $product->name_en }}"
-                                       data-price="{{ $product->price }}"
-                                       data-img="{{ $baseImagePath . $product->main_image }}"
-                                       data-product-barcode="{{ $product->product_barcode }}">
-                                       Add to Cart
-                                    </a>
-                                @elseif($product->link_status == 'Read More')
-                                    <a href="{{ route('product.details', $product->slug) }}">Select Option</a>
-                                @endif
-                                <button class="wish-btn">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                            </div>
-                        @endif
-                    </div>
-                @endforeach
+               @include('product-categories.partials.products-grid', [
+                    'products' => $products,
+                    'baseImagePath' => $baseImagePath,
+                    'stocks' => $stocks ?? []
+                ])
             </div>
         </div>
     </div>
@@ -131,12 +149,12 @@
     <!-- Offcanvas (Mobile Filter) -->
     <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="offcanvasTabs">
         <div class="offcanvas-header">
-            <h5 id="offcanvasTabsLabel">Filter</h5>
-            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+            <!--h5 id="offcanvasTabsLabel">Filter</h5-->
+            <!--h6 class="fw-bold mb-2">Price Range</h6-->
+            <!--button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button-->
         </div>
         <div class="offcanvas-body">
-            <div class="mb-4">
-                <h6 class="fw-bold mb-2">Price Range</h6>
+            <div class="mb-2">
                 <input type="range" class="form-range" min="60" max="25000" step="100" id="priceRangeMobile">
                 <div class="d-flex justify-content-between">
                     <small>৳60</small>
@@ -145,40 +163,68 @@
                 </div>
             </div>
 
-            <h6 class="fw-bold mb-2">Product Category</h6>
-            <ul class="nav flex-column nav-pills">
-                @foreach($mainMenus as $main)
-                    <li class="nav-item">
-                        <a class="nav-link main-menu-tab" href="{{ url('category/' . str_replace(' ', '-', $main->name)) }}">
-                            {{ $main->name }}
-                        </a>
+            <!--h6 class="fw-bold mb-2">Product Category</h6-->
+                <ul class="nav flex-column nav-pills">
+                    @foreach($mainMenus as $main)
+                        @php
+                            
+                            $mainUrlName = $main->name;
 
-                        @if($main->subMenus->count())
-                            <ul class="nav flex-column ms-3 mt-1">
-                                @foreach($main->subMenus as $sub)
-                                    <li class="nav-item">
-                                        <a class="nav-link sub-menu-tab" href="{{ url('subcategory/'.$sub->id) }}">
-                                            {{ $sub->name }}
-                                        </a>
+                        
+                            if (strtolower($main->name) === 'new arrivals') {
+                                $mainUrlName = 'New-Arrivals';
+                            }
 
-                                        @if($sub->childMenus->count())
-                                            <ul class="nav flex-column ms-3 mt-1">
-                                                @foreach($sub->childMenus as $child)
-                                                    <li class="nav-item">
-                                                        <a class="nav-link child-menu-tab" href="{{ url('childcategory/'.$child->id) }}">
-                                                            {{ $child->name }}
-                                                        </a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        @endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-                    </li>
-                @endforeach
-            </ul>
+                            
+
+                        @endphp
+
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link main-menu-tab
+                            {{ request()->is('category/'.$mainUrlName) ? 'active-menu' : '' }}"
+                            href="{{ url('category/'.$mainUrlName) }}">
+                                {{ $main->name }}
+                            </a>
+
+                            @if($main->subMenus->count())
+                                <ul class="nav flex-column ms-3 mt-1">
+                                    @foreach($main->subMenus as $sub)
+                                        <li class="nav-item">
+                                            <a class="nav-link sub-menu-tab
+                                            {{ request()->is('subcategory/'.$sub->id) ? 'active-menu' : '' }}"
+                                            href="{{ url('subcategory/'.$sub->id) }}">
+                                                {{ $sub->name }}
+                                            </a>
+
+                                            @if($sub->childMenus->count())
+                                                <ul class="nav flex-column ms-3 mt-1">
+                                                    @foreach($sub->childMenus as $child)
+                                                        <li class="nav-item">
+                                                            <a class="nav-link child-menu-tab
+                                                            {{ request()->is('childcategory/'.$child->id) ? 'active-menu' : '' }}"
+                                                            href="{{ url('childcategory/'.$child->id) }}">
+                                                                {{ $child->name }}
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+
+
+
+      
+
+
+
+
+
         </div>
     </div>
 </div>
@@ -186,13 +232,13 @@
 @endsection
 
 @section('script')
-<script src="{{asset('/js/jquery-3.6.0.min.js')}}" ></script>
-<script src="{{asset('/js/popper.js')}}"></script>
-<script src="{{asset('/js/bootstrap.bundle.min.js')}}"></script>
-<script src="{{asset('/js/custom.js')}}"></script>
-
+<script src="{{ asset('/js/jquery-3.6.0.min.js') }}"></script>
+<script src="{{ asset('/js/popper.js') }}"></script>
+<script src="{{ asset('/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('/js/swiper-bundle.min.js') }}"></script>
+<script src="{{ asset('/js/custom.js') }}"></script>
 <script>
-   /* ---------- Price Range Filter ---------- */
+/* ---------- Price Range Filter ---------- */
 function priceFilter(rangeId, valueId, defaultValue = 10000) {
     const range = document.getElementById(rangeId);
     const value = document.getElementById(valueId);
@@ -228,5 +274,55 @@ $(document).on('click', '.main-menu-tab, .sub-menu-tab, .child-menu-tab', functi
         window.location.href = '/childcategory/' + slug;
     }
 });
+
+
 </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const modal = document.createElement("div");
+    modal.className = "image-modal";
+
+    modal.innerHTML = `
+        <span class="close-btn">&times;</span>
+        <img src="" />
+    `;
+
+    document.body.appendChild(modal);
+
+    const modalImg = modal.querySelector("img");
+    const closeBtn = modal.querySelector(".close-btn");
+
+    // 🔥 EVENT DELEGATION (mobile safe fix)
+    document.addEventListener("click", function (e) {
+
+        // OPEN ZOOM
+        const zoom = e.target.closest(".zoom-icon");
+        if (zoom) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            modalImg.src = zoom.dataset.img;
+            modal.style.display = "flex";
+            return;
+        }
+
+        // CLOSE BUTTON
+        if (e.target.classList.contains("close-btn")) {
+            modal.style.display = "none";
+            modalImg.src = "";
+            return;
+        }
+
+        // OUTSIDE CLICK CLOSE
+        if (e.target === modal) {
+            modal.style.display = "none";
+            modalImg.src = "";
+        }
+    });
+
+});
+</script>
+
 @endsection

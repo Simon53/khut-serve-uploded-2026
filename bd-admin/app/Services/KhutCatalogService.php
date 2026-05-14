@@ -144,4 +144,39 @@ class KhutCatalogService
             $this->decrementStock($barcode, (int) $item->quantity);
         }
     }
+
+   
+    //cancel order, restore stock
+
+    public function incrementStock(string $barcode, int $qty): void{
+            if ($qty <= 0) {
+                return;
+            }
+
+            $barcode = trim($barcode);
+            $catalog = Cache::get(self::CACHE_KEY, []);
+
+            if (!isset($catalog[$barcode])) {
+                return;
+            }
+
+            // স্টক বৃদ্ধি করা হচ্ছে
+            $catalog[$barcode]['stock'] = (int)$catalog[$barcode]['stock'] + $qty;
+            Cache::put(self::CACHE_KEY, $catalog, self::TTL);
+        }
+
+        public function incrementForOrder(Order $order): void
+        {
+            $items = $order->relationLoaded('items')
+                ? $order->items
+                : $order->items()->get();
+
+            foreach ($items as $item) {
+                $barcode = trim((string) ($item->barcode ?? ''));
+                if ($barcode === '') {
+                    continue;
+                }
+                $this->incrementStock($barcode, (int) $item->quantity);
+            }
+        }
 }

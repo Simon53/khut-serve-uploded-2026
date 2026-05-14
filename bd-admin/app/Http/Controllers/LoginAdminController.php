@@ -54,7 +54,7 @@ class LoginAdminController extends Controller{
             'username'  => 'required|string|max:255|unique:login_admin,username',
             'email'     => 'required|email|unique:login_admin,email',
             'password'  => 'required|min:6',
-            'role'      => 'required|in:Administrator,Moderator'
+            'role' => 'required|in:Administrator,Moderator,Editor'
         ]);
 
         $user = LoginAdmin::create([
@@ -86,7 +86,7 @@ class LoginAdminController extends Controller{
             'username'  => 'required|string|max:255|unique:login_admin,username,' . $id,
             'email'     => 'required|email|unique:login_admin,email,' . $id,
             'password'  => 'nullable|min:6',
-            'role'      => 'required|in:Administrator,Moderator'
+            'role' => 'required|in:Administrator,Moderator,Editor'
         ]);
 
         $user = LoginAdmin::findOrFail($id);

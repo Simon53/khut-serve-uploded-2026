@@ -44,7 +44,7 @@ class Product extends Model{
         'link_status',
         'main_menu_id', 
         'sub_menu_id', 
-        'child_menu_id'
+        'child_menu_id',
     ];  
 
     public function thumbnails() {
@@ -97,6 +97,18 @@ class Product extends Model{
                 $product->slug = Str::slug($product->name_en);
             }
         });
+    }
+    
+     public function options()
+    {
+        return $this->hasManyThrough(
+            ProductOption::class,
+            ProductThumbnail::class,
+            'product_id',   // Foreign key on thumbnails table
+            'thumbnail_id', // Foreign key on options table
+            'id',           // Local key on products
+            'id'            // Local key on thumbnails
+        );
     }
 
 }

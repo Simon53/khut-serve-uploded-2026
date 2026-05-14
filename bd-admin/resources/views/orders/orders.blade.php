@@ -57,14 +57,34 @@
 </style>
 
 <div class="container-fluid">
-    <div class="row">
+    <div class="">
         <div class="card p-4 col-md-12 table-responsive" style="color:#333">
             <h4>Order List</h4>
+                <div class="col-md-12">
+                    <form action="{{ route('orders.index') }}" method="GET" class="float-right form-inline col-md-6 mb-2">
+                        <div class="input-group col-md-12" >
+                           <input type="text" name="search" class="form-control " 
+                               placeholder="Search by Order Id, Customer Name, Contact No., Product Name or DD-MM-YYYY" 
+                               value="{{ request('search') }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fa fa-search"></i> Search
+                                </button>
+                                @if(request('search'))
+                                    <a href="{{ route('orders.index') }}" class="btn btn-secondary">Clear</a>
+                                @endif
+                            </div>
+                        </div>
+                    </form>
+                </div>
+           
 
             <table class="table table-bordered table-hover">
                 <thead class="thead-light">
                     <tr>
                         <th>SL</th>
+                        <th>Order ID</th>
+                        <th>Image</th>
                         <th>Customer</th>
                         <th>Product Name</th>
                         <th>Order Date</th>
@@ -82,11 +102,34 @@
                     <tr id="orderRow{{ $order->id }}">
                         <td>{{ $loop->iteration }}</td>
 
+                        
+                         <td>
+                            <a href="{{ route('orders.show', $order->id) }}">
+                                {{ $order->id }} 
+                            </a>
+                        </td>
+
+                        @php
+                            $firstItem = $order->items->first();
+                            $product = $firstItem?->product;
+
+                            $image = $product?->main_image
+                                ? env('ADMIN_BASE_URL') . '/storage/' . $product->main_image
+                                : asset('no-image.png');
+                        @endphp
+
+                        <td>
+                            <img src="{{ $image }}"
+                                style="border-radius:4px; width:60px; height:auto">
+                        </td>
+                         
                         <td>
                             <a href="{{ route('orders.show', $order->id) }}">
                                 {{ $order->first_name }} {{ $order->last_name }}
                             </a>
                         </td>
+                        
+                        
                         
                         <td>
                             @foreach($order->items as $item)
@@ -158,19 +201,25 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 $(document).ready(function(){
 
-    // Click badge → show select
+    // ১. ব্যাজ এ ক্লিক করলে সিলেক্ট বক্স দেখাবে
     $(document).on('click', '.delivery-badge', function() {
         let badge = $(this);
         let select = badge.siblings('select.delivery-status');
-
+        
+        // সব খোলা সিলেক্ট বক্স বন্ধ করে শুধু এটি ওপেন করা
+        $('.delivery-status').hide();
+        $('.delivery-badge').show();
+        
         badge.hide();
         select.show().focus();
     });
 
-    // Change delivery status
+    // ২. ডেলিভারি স্ট্যাটাস পরিবর্তন করলে যা হবে
     $(document).on('change', '.delivery-status', function() {
         let select = $(this);
         let badge = select.siblings('.delivery-badge');
@@ -178,63 +227,82 @@ $(document).ready(function(){
         let status  = select.val();
         let statusText = status.charAt(0).toUpperCase() + status.slice(1);
 
-        if(!confirm(`Are you sure you want to mark this order as "${statusText}"?`)) {
-            select.val(badge.text().toLowerCase());
-            select.hide();
-            badge.show();
-            return;
-        }
+        // সুন্দর কনফার্মেশন পপআপ (ব্রাউজার alert/confirm এর বদলে)
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to change the status to "${statusText}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, update it!',
+            cancelButtonText: 'No'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                let updateUrl = "{{ url('admin/orders') }}/:id/delivery-status".replace(':id', orderId);
 
-        let updateUrl = "{{ url('admin/orders') }}/:id/delivery-status".replace(':id', orderId);
+                $.ajax({
+                    url: updateUrl,
+                    type: 'PATCH',
+                    data: { delivery_status: status },
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                    success: function(res) {
+                        
+                        // সাকসেস টোস্ট মেসেজ (কন্ট্রোলার থেকে আসা স্টক মেসেজটি এখানে দেখাবে)
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: res.message, 
+                            timer: 3000,
+                            showConfirmButton: false,
+                            toast: true,
+                            position: 'top-end'
+                        });
 
-        $.ajax({
-            url: updateUrl,
-            type: 'PATCH',
-            data: { delivery_status: status },
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            success: function(res) {
+                        // Delivery badge কালার এবং টেক্সট আপডেট
+                        badge.text(statusText)
+                             .removeClass('bg-pending bg-confirmed bg-delivered bg-cancel')
+                             .addClass(
+                                status == 'pending' ? 'bg-pending' :
+                                status == 'confirmed' ? 'bg-confirmed' :
+                                status == 'delivered' ? 'bg-delivered' :
+                                'bg-cancel'
+                             );
 
-                alert(res.message);
+                        // Payment status ব্যাজ আপডেট লজিক
+                        let paymentBadge = badge.closest('tr').find('.status-badge');
+                        if(status === 'cancel'){
+                            paymentBadge.text('Order Cancel')
+                                        .removeClass('bg-paid bg-cod')
+                                        .addClass('bg-cancel');
+                        } else {
+                            let original = paymentBadge.data('original');
+                            paymentBadge.text(original)
+                                        .removeClass('bg-cancel')
+                                        .addClass('bg-paid');
+                        }
 
-                // 👉 Delivery badge update
-                badge.text(statusText)
-                     .removeClass('bg-pending bg-confirmed bg-delivered bg-cancel')
-                     .addClass(
-                        status == 'pending' ? 'bg-pending' :
-                        status == 'confirmed' ? 'bg-confirmed' :
-                        status == 'delivered' ? 'bg-delivered' :
-                        'bg-cancel'
-                     );
-
-                // 👉 Payment status update
-                let paymentBadge = badge.closest('tr').find('.status-badge');
-
-                if(status === 'cancel'){
-                    paymentBadge
-                        .text('Order Cancel')
-                        .removeClass('bg-paid bg-cod')
-                        .addClass('bg-cancel');
-                } else {
-                    let original = paymentBadge.data('original');
-
-                    paymentBadge
-                        .text(original)
-                        .removeClass('bg-cancel')
-                        .addClass('bg-paid');
-                }
-
-                select.hide();
-                badge.show();
-            },
-            error: function() {
-                alert("Something went wrong.");
+                        select.hide();
+                        badge.show();
+                    },
+                    error: function() {
+                        Swal.fire('Error!', 'Something went wrong while updating.', 'error');
+                        // এরর হলে আগের ভ্যালুতে ফিরিয়ে নেয়া
+                        select.val(badge.text().trim().toLowerCase());
+                        select.hide();
+                        badge.show();
+                    }
+                });
+            } else {
+                // ইউজার ক্যানসেল করলে সিলেক্ট বক্স হাইড করে আগের ব্যাজ দেখানো
+                select.val(badge.text().trim().toLowerCase());
                 select.hide();
                 badge.show();
             }
         });
     });
 
-    // Click outside → hide select
+    // ৩. সিলেক্ট বক্সের বাইরে ক্লিক করলে সেটি অটো হাইড হয়ে যাবে
     $(document).click(function(event) { 
         if(!$(event.target).closest('.delivery-badge, .delivery-status').length) {
             $('.delivery-status').hide();
@@ -243,4 +311,6 @@ $(document).ready(function(){
     });
 });
 </script>
+
+
 @endsection

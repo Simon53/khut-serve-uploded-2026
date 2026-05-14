@@ -31,7 +31,12 @@ class SyncKhutStock extends Command
 
         foreach ($skus as $sku) {
 
-            $response = Http::get('https://khut.bdsoft.us/api/get_stock.php', [
+            // $response = Http::get('https://khut.bdsoft.us/api/get_stock.php', [
+            //     'sku' => $sku,
+            //     'secret_key' => $secretKey
+            // ]);
+            
+             $response = Http::get(env('STOCK_API_URL'), [
                 'sku' => $sku,
                 'secret_key' => $secretKey
             ]);

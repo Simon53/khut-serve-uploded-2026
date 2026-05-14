@@ -48,14 +48,14 @@ class StockController extends Controller
      * Returns int (0 if unavailable).
      */
     public function getStockQuantity(string $sku): int
-    {
-        $sku = trim($sku);
-        if ($sku === '') {
-            return 0;
+        {
+            $sku = ltrim(trim($sku), '0'); // normalize barcode
+            if ($sku === '') {
+                return 0;
+            }
+        
+            return app(KhutCatalogService::class)->getStock($sku);
         }
-
-        return app(KhutCatalogService::class)->getStock($sku);
-    }
 
     /**
      * Fetch stock for multiple SKUs from the catalog. Returns [sku => quantity].

@@ -105,21 +105,37 @@
             <!-- Vertical Categorxb fy Tree -->
             <ul class="nav flex-column nav-pills">
                 @foreach($mainMenus as $main)
-                    @php
-                        // Default: menu name 그대로
-                        $mainUrlName = $main->name;
+                   @php
+                    // URL same থাকবে
+                    $mainUrlName = $main->name;
 
-                        // Special case: New Arrivals
-                        if (strtolower($main->name) === 'new arrivals') {
-                            $mainUrlName = 'New-Arrivals';
-                        }
-                    @endphp
+                    if (strtolower($main->name) === 'new arrivals') {
+                        $mainUrlName = 'New-Arrivals';
+                    }
+
+                    // 👉 শুধু display ঠিক করার জন্য
+                    $displayName = $main->name;
+
+                    if ($main->name === 'Gifts&Crafts') {
+                        $displayName = 'Gifts & Crafts';
+                    }
+
+                    if ($main->name === 'Hojoborolo') {
+                        $displayName = 'Ho-Jo-Bo-Ro-Lo';
+                    }
+                @endphp
 
                     <li class="nav-item" role="presentation">
                         <a class="nav-link main-menu-tab
                         {{ request()->is('category/'.$mainUrlName) ? 'active-menu' : '' }}"
                         href="{{ url('category/'.$mainUrlName) }}">
-                            {{ $main->name }}
+                            @if($main->name === 'Gifts&Crafts')
+                                Gifts & Crafts
+                            @elseif($main->name === 'Hojoborolo')
+                                Ho-Jo-Bo-Ro-Lo
+                            @else
+                                {{ $main->name }}
+                            @endif
                         </a>
 
                         @if($main->subMenus->count())
@@ -156,7 +172,7 @@
         </div>
 
         <!-- Product Grid -->
-        <div class="col-lg-9">
+        <div class="col-lg-9" style="padding-right: 0;">
             
             <div class="row" id="product-list">
                @include('product-categories.partials.products-grid', [
@@ -301,5 +317,50 @@ $(document).on('click', '.main-menu-tab, .sub-menu-tab, .child-menu-tab', functi
 </script>
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+    const modal = document.createElement("div");
+    modal.className = "image-modal";
+
+    modal.innerHTML = `
+        <span class="close-btn">&times;</span>
+        <img src="" />
+    `;
+
+    document.body.appendChild(modal);
+
+    const modalImg = modal.querySelector("img");
+    const closeBtn = modal.querySelector(".close-btn");
+
+    // 🔥 EVENT DELEGATION (mobile safe fix)
+    document.addEventListener("click", function (e) {
+
+        // OPEN ZOOM
+        const zoom = e.target.closest(".zoom-icon");
+        if (zoom) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            modalImg.src = zoom.dataset.img;
+            modal.style.display = "flex";
+            return;
+        }
+
+        // CLOSE BUTTON
+        if (e.target.classList.contains("close-btn")) {
+            modal.style.display = "none";
+            modalImg.src = "";
+            return;
+        }
+
+        // OUTSIDE CLICK CLOSE
+        if (e.target === modal) {
+            modal.style.display = "none";
+            modalImg.src = "";
+        }
+    });
+
+});
+</script>
 @endsection

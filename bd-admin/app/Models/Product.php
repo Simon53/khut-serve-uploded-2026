@@ -45,7 +45,7 @@ class Product extends Model{
         'link_status',
         'main_menu_id', 
         'sub_menu_id', 
-        'child_menu_id'
+        'child_menu_id',
     ];  
 
     public function thumbnails() {

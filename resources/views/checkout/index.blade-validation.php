@@ -142,6 +142,7 @@
                                     <option value="Comilla">Comilla</option>
                                     <option value="Cox's Bazar">Cox's Bazar</option>
                                     <option value="Dhaka" selected>Dhaka</option>
+                                    <option value="Savar">Savar</option>
                                     <option value="Dinajpur">Dinajpur</option>
                                     <option value="Faridpur">Faridpur</option>
                                     <option value="Feni">Feni</option>
@@ -393,6 +394,40 @@
 <script src="{{ asset('/js/custom.js') }}"></script>
 
 <script>
+    function isOutsideDhakaButSelectedDhaka(postcode) {
+        const postcodeNum = parseInt(postcode);
+
+        const isSavar = (postcodeNum >= 1340 && postcodeNum <= 1349);
+        const isNarayanganj = (postcodeNum >= 1400 && postcodeNum <= 1430);
+
+        return isSavar || isNarayanganj;
+    }
+
+   
+    function isDhakaCorePostcode(postcode) {
+        const p = parseInt(postcode);
+        return (p == 1000 || p == 1100 || (p >= 1203 && p <= 1236));
+    }
+
+    function isSavar(postcode) {
+        const p = parseInt(postcode);
+        return (p >= 1340 && p <= 1349);
+    }
+
+    function isNarayanganj(postcode) {
+        const p = parseInt(postcode);
+        return (p >= 1400 && p <= 1430);
+    }
+
+    function isOutsideDhakaRegion(postcode) {
+        return isSavar(postcode) || isNarayanganj(postcode);
+    }
+</script>
+
+<script>
+
+    
+
     // Track completed steps
     const completedSteps = {
         billing: false,
@@ -465,73 +500,57 @@
         const postcode = $("#billingPostcode").val() || '';
 
         // Validate First Name
-        if (!firstName.trim()) {
-            showError('FirstName', 'First name is required.');
-            isValid = false;
-        }
-
-        // Validate Last Name
-        if (!lastName.trim()) {
-            showError('LastName', 'Last name is required.');
-            isValid = false;
-        }
-
-        // Validate Email
-        if (!email.trim()) {
-            showError('Email', 'Email address is required.');
-            isValid = false;
-        } else {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email.trim())) {
-                showError('Email', 'Please enter a valid email address.');
-                isValid = false;
-            }
-        }
-
-        // Validate Phone
-        if (!phone.trim()) {
-            showError('Phone', 'Phone number is required.');
-            isValid = false;
-        } else {
-            const phoneClean = phone.replace(/\s/g, '');
-            if (!/^01\d{9}$/.test(phoneClean)) {
-                showError('Phone', 'Please enter a valid 11-digit phone number starting with 01.');
-                isValid = false;
-            }
-        }
-
-        // Validate Address
-        if (!address.trim()) {
-            showError('Address', 'Street address is required.');
-            isValid = false;
-        }
-
-        // Validate Country
-        if (!country || country === 'Select Country...') {
-            showError('Country', 'Please select a country.');
-            isValid = false;
-        }
-
-        // Validate District
-        if (!district || district === 'Select your district...') {
-            showError('District', 'Please select a district.');
-            isValid = false;
-        }
-
-        // Validate City
-        if (!city.trim()) {
-            showError('City', 'Town/City is required.');
-            isValid = false;
-        }
-
-        // Validate Postcode
         if (!postcode.trim()) {
             showError('Postcode', 'Postcode is required.');
             isValid = false;
+
+        } else if (!/^\d{4}$/.test(postcode.trim())) {
+            showError('Postcode', 'Please enter a valid 4-digit postcode.');
+            isValid = false;
+
         } else {
-            if (!/^\d{4}$/.test(postcode.trim())) {
-                showError('Postcode', 'Please enter a valid 4-digit postcode.');
-                isValid = false;
+
+            const p = parseInt(postcode);
+
+            // =========================
+            // 🔴 DHAKA SELECTED RULE
+            // =========================
+            if (district.toLowerCase() === 'dhaka') {
+
+                // ❌ Savar or Narayanganj block
+                if (
+                    (p >= 1340 && p <= 1349) ||   // Savar
+                    (p >= 1400 && p <= 1430)      // Narayanganj
+                ) {
+                    showError('Postcode', 'This postcode is not inside Dhaka city.');
+                    isValid = false;
+                }
+
+                // ❌ invalid Dhaka core postcode block
+                else if (!(p == 1000 || p == 1100 || (p >= 1203 && p <= 1236))) {
+                    showError('Postcode', 'Please enter valid Dhaka city postcode.');
+                    isValid = false;
+                }
+            }
+
+            // =========================
+            // 🔴 SAVAR SELECTED RULE
+            // =========================
+            if (district.toLowerCase() === 'savar') {
+                if (!(p >= 1340 && p <= 1349)) {
+                    showError('Postcode', 'Invalid Savar postcode.');
+                    isValid = false;
+                }
+            }
+
+            // =========================
+            // 🔴 NARAYANGANJ SELECTED RULE
+            // =========================
+            if (district.toLowerCase() === 'narayanganj') {
+                if (!(p >= 1400 && p <= 1430)) {
+                    showError('Postcode', 'Invalid Narayanganj postcode.');
+                    isValid = false;
+                }
             }
         }
 
@@ -573,10 +592,10 @@
 
         switch(currentStep) {
             case 'billing':
-                isValid = validateBilling();
-                if (isValid) {
+                 if (validateBilling()) {
                     completedSteps.billing = true;
                     enableTab('shipping-tab');
+                    nextTab(nextTabId);
                 }
                 break;
             case 'shipping':
@@ -653,45 +672,49 @@
     
     // Update payment method options based on postcode AND district
     function updatePaymentMethods() {
-    const postcode = $("#billingPostcode").length ? $("#billingPostcode").val() : $("#billing input[placeholder='4-digit Number']").val() || '';
-    const district = $("#billingDistrict").val() || '';
+        const postcode = $("#billingPostcode").val() || '';
+        const district = $("#billingDistrict").val() || '';
 
-    const codOption = $("#codPaymentOption");
-    const cardRadio = $("input[name='paymentMethod'][value='card']");
-    const codRadio = $("input[name='paymentMethod'][value='cod']");
+        const codOption = $("#codPaymentOption");
+        const cardRadio = $("input[name='paymentMethod'][value='card']");
+        const codRadio = $("input[name='paymentMethod'][value='cod']");
 
-    if (district && district.toLowerCase() !== 'dhaka') {
-        // District Dhaka na hole COD hide
-        codOption.hide();
-        if (codRadio.is(':checked')) {
-            cardRadio.prop('checked', true);
-        }
-        return; // Exit function, postcode logic skipped
-    }
-
-    // Only run postcode logic if district = Dhaka
-    if (postcode && /^\d{4}$/.test(postcode.trim())) {
-        const isInSpecialRange = isPostcodeInSpecialRange(postcode);
-        
-        if (isInSpecialRange) {
-            codOption.show();
-            if (cardRadio.is(':checked')) {
-                codRadio.prop('checked', true);
-            }
-        } else {
+        // ❌ Dhaka না হলে COD নাই
+        if (district && district.toLowerCase() !== 'dhaka') {
             codOption.hide();
             if (codRadio.is(':checked')) {
                 cardRadio.prop('checked', true);
             }
+            return;
         }
-    } else {
-        // Postcode not entered or invalid - hide COD by default
-        codOption.hide();
-        if (!$("input[name='paymentMethod']:checked").length) {
+
+        // 🔴 Dhaka select but Savar/Narayanganj → COD hide
+        if (district.toLowerCase() === 'dhaka' && isOutsideDhakaButSelectedDhaka(postcode)) {
+            codOption.hide();
+            cardRadio.prop('checked', true);
+            return;
+        }
+
+        // ✅ Dhaka valid postcode হলে
+        if (postcode && /^\d{4}$/.test(postcode.trim())) {
+            const isInSpecialRange = isPostcodeInSpecialRange(postcode);
+
+            if (isInSpecialRange) {
+                codOption.show();
+                if (cardRadio.is(':checked')) {
+                    codRadio.prop('checked', true);
+                }
+            } else {
+                codOption.hide();
+                if (codRadio.is(':checked')) {
+                    cardRadio.prop('checked', true);
+                }
+            }
+        } else {
+            codOption.hide();
             cardRadio.prop('checked', true);
         }
     }
-}
     
     
 
@@ -883,19 +906,7 @@
 		}
 	}
 
-    // Validate required fields - use the same validation function
-    if (!validateBilling()) {
-        // Scroll to first error
-        const firstError = $('.is-invalid').first();
-        if (firstError.length) {
-            $('html, body').animate({
-                scrollTop: firstError.offset().top - 100
-            }, 500);
-        }
-        // Switch to billing tab to show errors
-        nextTab('billing-tab');
-        return;
-    }
+  
 
     // If Card payment, create a form and submit directly (not via AJAX)
     if (paymentMethod === 'card') {
@@ -962,7 +973,8 @@
             orderForm.submit();
         }, 100);
     }
-});
+
+ });
 </script>
 @endsection
 

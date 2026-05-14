@@ -371,26 +371,27 @@
         });
 
         // Submit Submenu Form
-        $('#addSubmenuForm').on('submit', function (e) {
-            e.preventDefault();
+      // Submit Submenu Form
+$('#addSubmenuForm').on('submit', function (e) {
+    e.preventDefault();
 
-            let formData = new FormData(this);
+    let formData = new FormData(this);
 
-            axios.post('basePath + /submenu/store', formData)
-                .then(res => {
-                    if (res.data.success) {
-                        toastr.success('Submenu added successfully');
-                        $('#addSubmenuModal').modal('hide');
-                        location.reload(); 
-                    } else {
-                        toastr.error('Submenu creation failed');
-                    }
-                })
-                .catch(err => {
-                    toastr.error('Something went wrong');
-                    console.error(err);
-                });
+    axios.post(basePath + '/submenu/store', formData)
+        .then(res => {
+            if (res.data.success) {
+                toastr.success('Submenu added successfully');
+                $('#addSubmenuModal').modal('hide');
+                location.reload(); 
+            } else {
+                toastr.error('Submenu creation failed');
+            }
+        })
+        .catch(err => {
+            toastr.error('Something went wrong');
+            console.error(err);
         });
+});
     });
 
 

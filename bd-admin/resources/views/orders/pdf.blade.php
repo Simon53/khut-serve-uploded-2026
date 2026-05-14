@@ -74,6 +74,7 @@
     <table>
         <thead>
             <tr>
+                <th>Images</th>
                 <th>Product</th>
                 <th>Size</th>
                 <th>Color</th>
@@ -84,38 +85,48 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($order->items as $item)
-                @php
-                    // Base64 product image (PNG only)
-                    $imageFile = public_path('storage/products/'.$item->image ?? '');
-                    $imageSrc = '';
-                    if(file_exists($imageFile)) {
-                        $ext = strtolower(pathinfo($imageFile, PATHINFO_EXTENSION));
-                        if($ext === 'webp') {
-                            $imageFile = str_replace('.webp', '.png', $imageFile);
-                        }
-                        if(file_exists($imageFile)) {
-                            $imageBase64 = base64_encode(file_get_contents($imageFile));
-                            $imageSrc = 'data:image/png;base64,'.$imageBase64;
-                        }
-                    }
-                @endphp
-                <tr>
-                    <td>
-                        {{ $item->product_name }}
-                        @if($imageSrc)
-                            <br>
-                            <img src="{{ $imageSrc }}" style="width:50px; height:auto;">
-                        @endif
-                    </td>
-                    <td>{{ $item->size ?? '-' }}</td>
-                    <td>{{ $item->color ?? '-' }}</td>
-                    <td>{{ $item->quantity }}</td>
-                    <td>{{ $item->barcode ?? '-' }}</td>
-                    <td>৳ {{ number_format($item->price, 2) }}</td>
-                    <td>৳ {{ number_format($item->subtotal, 2) }}</td>
-                </tr>
-            @endforeach
+          @foreach($order->items as $item)
+
+    @php
+        $imageSrc = null;
+
+        // product relation use করা best
+        $product = $item->product;
+
+        if ($product && $product->main_image) {
+
+            $imagePath = public_path('storage/' . $product->main_image);
+
+            if (file_exists($imagePath)) {
+                $ext = strtolower(pathinfo($imagePath, PATHINFO_EXTENSION));
+
+                // PDF safe format
+                if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+                    $imageSrc = 'data:image/'.$ext.';base64,' . base64_encode(file_get_contents($imagePath));
+                }
+            }
+        }
+    @endphp
+
+    <tr>
+        <td>
+            {{ $item->product_name }}
+
+            @if($imageSrc)
+                <br>
+                <img src="{{ $imageSrc }}" style="width:50px;height:50px;object-fit:cover;border:1px solid #ddd;">
+            @endif
+        </td>
+
+        <td>{{ $item->size ?? '-' }}</td>
+        <td>{{ $item->color ?? '-' }}</td>
+        <td>{{ $item->quantity }}</td>
+        <td>{{ $item->barcode ?? '-' }}</td>
+        <td>৳ {{ number_format($item->price, 2) }}</td>
+        <td>৳ {{ number_format($item->subtotal, 2) }}</td>
+    </tr>
+
+@endforeach
         </tbody>
         <tfoot>
             <tr>

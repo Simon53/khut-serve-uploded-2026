@@ -49,3 +49,24 @@
 
       <!-- ===== Slider End ===== -->
       
+      <!-- ===== Under Construction Modal ===== -->
+<!--div class="modal fade" id="underConstructionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body">
+        <h5>🚧 Under Construction 🚧</h5>
+        <p>Coming back very soon...</p>
+        <button type="button" class="btn btn-sm btn-primary mt-2" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div-->
+
+<!-- ===== Script to Show Modal on Page Load ===== -->
+<!--script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var underModal = new bootstrap.Modal(document.getElementById('underConstructionModal'));
+    underModal.show();
+  });
+</script-->
+      

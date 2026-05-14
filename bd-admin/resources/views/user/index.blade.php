@@ -46,85 +46,59 @@
     </div>
 </div>
 
-{{-- Add User Modal --}}
+{{-- Add/Edit User Modal --}}
+<!-- SINGLE MODAL (ADD + EDIT) -->
 <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add New User</h5>
-                <button type="button" class="btn-danger" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body">
-                <form id="addUserForm">
-                    @csrf
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select name="role" class="form-control" required>
-                            <option value="Administrator">Administrator</option>
-                            <option value="Moderator">Moderator</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success">Add</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Add/Edit User Modal -->
-<div class="modal fade" id="addUserModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New User</h5>
-                <button type="button" class="btn-danger" data-dismiss="modal"><span>&times;</span></button>
+                <h5 class="modal-title text-black">Add New User</h5>
+                <button type="button" class="btn-danger" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
             </div>
+
             <div class="modal-body">
+
                 <form id="addUserForm">
                     @csrf
+
                     <div class="form-group">
                         <label>Name</label>
                         <input type="text" name="name" class="form-control" required>
                     </div>
+
                     <div class="form-group">
                         <label>Username</label>
                         <input type="text" name="username" class="form-control" required>
                     </div>
+
                     <div class="form-group">
                         <label>Password</label>
                         <input type="password" name="password" class="form-control">
-                        <small class="form-text text-muted">Leave blank to keep current password</small>
+                        <small>Leave blank for edit</small>
                     </div>
+
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" name="email" class="form-control" required>
                     </div>
+
                     <div class="form-group">
                         <label>Role</label>
                         <select name="role" class="form-control" required>
                             <option value="Administrator">Administrator</option>
                             <option value="Moderator">Moderator</option>
+                            <option value="Editor">Editor</option>
                         </select>
                     </div>
+
                     <button type="submit" class="btn btn-success">Save</button>
                 </form>
+
             </div>
+
         </div>
     </div>
 </div>
@@ -137,79 +111,48 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-$('#addUserForm').on('submit', function(e){
-    e.preventDefault();
-    $.ajax({
-        url: "{{ route('user.store') }}",
-        method: "POST",
-        data: $(this).serialize(),
-        success: function(res){
-            if(res.success){
-                $('#addUserModal').modal('hide');  
-                toastr.success(res.message);      
-                $('#addUserForm')[0].reset();      
-                setTimeout(function(){
-                    location.reload();            
-                }, 500);
-            }
-        },
-        error: function(xhr){
-            if(xhr.status === 422){
-                let errors = xhr.responseJSON.errors;
-                $.each(errors, function(key, value){
-                    toastr.error(value[0]);
-                });
-            } else {
-                toastr.error('Something went wrong!');
-            }
-        }
-    });
-});
-
-
 $(document).ready(function(){
 
-    // Edit Button Click
-    $('.editBtn').click(function(){
-        var id = $(this).data('id');
-
-        $.get("{{ url('/user/edit') }}/"+id, function(user){
-            $('#addUserModal .modal-title').text('Edit User');
-            $('#addUserForm').attr('data-id', id); // Save id for update
-            $('#addUserForm input[name="name"]').val(user.name);
-            $('#addUserForm input[name="username"]').val(user.username);
-            $('#addUserForm input[name="email"]').val(user.email);
-            $('#addUserForm input[name="password"]').val(''); // Empty password
-            $('#addUserForm select[name="role"]').val(user.role);
-            $('#addUserModal').modal('show');
-        });
-    });
-
-    // Submit Add/Edit Form
-    $('#addUserForm').on('submit', function(e){
+    // =========================
+    // ADD + UPDATE USER
+    // =========================
+    $(document).on('submit', '#addUserForm', function(e){
         e.preventDefault();
-        var id = $(this).attr('data-id');
-        var url = id ? "{{ url('/user/update') }}/"+id : "{{ route('user.store') }}";
-        var method = id ? 'POST' : 'POST';
+
+        let form = $(this);
+        let id = form.attr('data-id');
+        let btn = form.find('button[type="submit"]');
+
+        btn.prop('disabled', true);
+
+        let url = id 
+            ? "/bd-admin/user/update/" + id 
+            : "{{ route('user.store') }}";
 
         $.ajax({
             url: url,
-            method: method,
-            data: $(this).serialize(),
+            method: "POST",
+            data: form.serialize(),
             success: function(res){
+                btn.prop('disabled', false);
+
                 if(res.success){
                     $('#addUserModal').modal('hide');
                     toastr.success(res.message);
-                    $('#addUserForm')[0].reset();
-                    $('#addUserForm').removeAttr('data-id');
-                    setTimeout(function(){ location.reload(); }, 1000);
+
+                    form[0].reset();
+                    form.removeAttr('data-id');
+
+                    setTimeout(() => location.reload(), 500);
                 }
             },
             error: function(xhr){
+                btn.prop('disabled', false);
+
                 if(xhr.status === 422){
                     let errors = xhr.responseJSON.errors;
-                    $.each(errors, function(key, value){
-                        toastr.error(value[0]);
+                    $.each(errors, function(k, v){
+                        toastr.error(v[0]);
                     });
                 } else {
                     toastr.error('Something went wrong!');
@@ -218,48 +161,100 @@ $(document).ready(function(){
         });
     });
 
-    // Reset modal when closed
-    $('#addUserModal').on('hidden.bs.modal', function () {
-        $('#addUserForm')[0].reset();
-        $('#addUserForm').removeAttr('data-id');
-        $('#addUserModal .modal-title').text('Add New User');
+
+    // =========================
+    // EDIT USER (OPEN MODAL FIXED)
+    // =========================
+   $(document).on('click', '.editBtn', function(){
+
+    let id = $(this).data('id');
+
+    $.ajax({
+        url: "/bd-admin/user/edit/" + id,
+        type: "GET",
+        success: function(user){
+
+            let form = $('#addUserForm');
+
+            // reset + set id
+            form[0].reset();
+            form.attr('data-id', id);
+
+            form.find('input[name="name"]').val(user.name);
+            form.find('input[name="username"]').val(user.username);
+            form.find('input[name="email"]').val(user.email);
+            form.find('input[name="password"]').val('');
+            form.find('select[name="role"]').val(user.role);
+
+            // ❌ REMOVE appendTo (এটাই bug)
+            // $('#addUserModal').appendTo("body").modal('show');
+
+            // ✔ SIMPLE AND SAFE WAY
+            $('#addUserModal').modal('show');
+
+            $('#addUserModal .modal-title').text('Edit User');
+        },
+        error: function(){
+            toastr.error('User load failed');
+        }
     });
 
 });
 
 
-$(document).on('click', '.deleteBtn', function(){
-    var id = $(this).data('id');
-    Swal.fire({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-        if(result.isConfirmed){
-            $.ajax({
-                url: "/user/delete/" + id,
-                type: "DELETE",
-                data: {
-                    "_token": "{{ csrf_token() }}"
-                },
-                success: function(res){
-                    if(res.success){
-                        toastr.success(res.message);
-                        $('#userTable').find('button[data-id="'+id+'"]').closest('tr').remove();
-                    } else {
-                        toastr.error(res.message);
-                    }
-                },
-                error: function(){
-                    toastr.error('Something went wrong!');
-                }
-            });
-        }
+    // =========================
+    // RESET MODAL
+    // =========================
+    $('#addUserModal').on('hidden.bs.modal', function () {
+        let form = $('#addUserForm');
+
+        form[0].reset();
+        form.removeAttr('data-id');
+
+        $('#addUserModal .modal-title').text('Add New User');
     });
+
+
+    // =========================
+    // DELETE USER
+    // =========================
+    $(document).on('click', '.deleteBtn', function(){
+
+        let id = $(this).data('id');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+
+            if(result.isConfirmed){
+                $.ajax({
+                    url: "/bd-admin/user/delete/" + id,
+                    type: "POST",
+                    data: {
+                        _method: "DELETE",
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(res){
+                        if(res.success){
+                            toastr.success(res.message);
+                            $('button[data-id="'+id+'"]').closest('tr').remove();
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    },
+                    error: function(){
+                        toastr.error('Delete failed!');
+                    }
+                });
+            }
+
+        });
+
+    });
+
 });
 </script>
 

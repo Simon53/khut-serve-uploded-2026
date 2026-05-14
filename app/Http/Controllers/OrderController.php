@@ -29,7 +29,7 @@ class OrderController extends Controller
     }
 
     $status = 'Cash on Delivery';
-    $deliveryStatus = 'pending';
+    $deliveryStatus = 'Cash on Delivery';
 
     $order = Order::create([
         'first_name' => $request->first_name,

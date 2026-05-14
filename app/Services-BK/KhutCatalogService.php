@@ -10,27 +10,35 @@ use Illuminate\Support\Facades\Log;
 class KhutCatalogService
 {
     private const CACHE_KEY = 'khut:catalog';
-    private const TTL = 300;
+    private const TTL = 300; // 5 minutes
 
+    /**
+     * Fetch fresh catalog from API and store in cache
+     */
     public function refresh(): array
     {
-        $secret = (string) (config('services.khut.secret') ?? '');
-        $baseUrl = (string) (config('services.khut.catalog_url') ?? '');
+        $secret = config('services.khut.secret');
+        $baseUrl = config('services.khut.catalog_url');
 
-        if ($secret === '' || $baseUrl === '') {
-            Log::warning('KhutCatalogService: missing config values');
+        // ✅ config validation
+        if (!$secret || !$baseUrl) {
+            Log::error('KhutCatalogService: Missing config values', [
+                'secret' => $secret,
+                'baseUrl' => $baseUrl,
+            ]);
             return [];
         }
 
         try {
-            $response = Http::timeout(20)
-                ->withHeaders([
-                    'Accept' => 'application/json',
-                    'User-Agent' => 'Mozilla/5.0',
-                ])
-                ->get($baseUrl, [
-                    'secret_key' => $secret,
-                ]);
+            $response = Http::timeout(20)->get($baseUrl, [
+                'secret_key' => $secret,
+            ]);
+
+            // ✅ response debug
+            Log::info('KhutCatalogService API call', [
+                'url' => $baseUrl,
+                'status' => $response->status(),
+            ]);
 
             if (!$response->successful()) {
                 Log::warning('KhutCatalogService: API failed', [
@@ -41,10 +49,15 @@ class KhutCatalogService
             }
 
             $payload = $response->json();
-            if (!is_array($payload) || !isset($payload['products']) || !is_array($payload['products'])) {
-                Log::warning('KhutCatalogService: Empty API data');
+
+            // ✅ important debug
+            if (!isset($payload['products'])) {
+                Log::warning('KhutCatalogService: Invalid API response', [
+                    'payload' => $payload,
+                ]);
                 return [];
             }
+
         } catch (\Throwable $e) {
             Log::error('KhutCatalogService: Exception', [
                 'message' => $e->getMessage(),
@@ -52,9 +65,12 @@ class KhutCatalogService
             return [];
         }
 
+        // ✅ build map
         $map = [];
+
         foreach ($payload['products'] as $item) {
             $barcode = trim((string)($item['barcode'] ?? ''));
+
             if ($barcode === '') {
                 continue;
             }
@@ -66,10 +82,19 @@ class KhutCatalogService
             ];
         }
 
+        // ✅ store cache
         Cache::put(self::CACHE_KEY, $map, self::TTL);
+
+        Log::info('KhutCatalogService: Catalog refreshed', [
+            'total_items' => count($map),
+        ]);
+
         return $map;
     }
 
+    /**
+     * Get full catalog (with cache)
+     */
     public function all(): array
     {
         return Cache::remember(self::CACHE_KEY, self::TTL, function () {
@@ -77,71 +102,90 @@ class KhutCatalogService
         });
     }
 
+    /**
+     * Check barcode exists
+     */
     public function hasBarcode(string $barcode): bool
     {
         $barcode = trim($barcode);
+
         if ($barcode === '') {
             return false;
         }
+
         $catalog = $this->all();
+
         return isset($catalog[$barcode]);
     }
 
+    /**
+     * Get stock
+     */
     public function getStock(string $barcode): int
     {
         $barcode = trim($barcode);
+
         if ($barcode === '') {
             return 0;
         }
+
         $catalog = $this->all();
-        return (int) ($catalog[$barcode]['stock'] ?? 0);
+
+        return (int)($catalog[$barcode]['stock'] ?? 0);
     }
 
-    public function decrementStock(string $barcode, int $qty): void
-    {
-        if ($qty <= 0) {
-            return;
-        }
-
-        $barcode = trim($barcode);
-        $catalog = Cache::get(self::CACHE_KEY, []);
-
-        if (!isset($catalog[$barcode])) {
-            return;
-        }
-
-        $catalog[$barcode]['stock'] = max(0, (int)$catalog[$barcode]['stock'] - $qty);
-        Cache::put(self::CACHE_KEY, $catalog, self::TTL);
-    }
-
+    /**
+     * Get multiple stocks
+     */
     public function getStocksForBarcodes(array $barcodes): array
     {
         $catalog = $this->all();
         $result = [];
 
-        foreach ($barcodes as $barcode) {
-            $key = trim((string) $barcode);
+        foreach ($barcodes as $b) {
+            $key = trim((string)$b);
+
             if ($key === '') {
                 continue;
             }
-            $result[$key] = (int) ($catalog[$key]['stock'] ?? 0);
+
+            $result[$key] = (int)($catalog[$key]['stock'] ?? 0);
         }
 
         return $result;
     }
 
+    /**
+     * Decrement stock locally
+     */
+    public function decrementStock(string $barcode, int $qty): void
+    {
+        if ($qty <= 0) return;
+
+        $barcode = trim($barcode);
+
+        $catalog = Cache::get(self::CACHE_KEY);
+
+        if (!isset($catalog[$barcode])) return;
+
+        $catalog[$barcode]['stock'] = max(0, (int)$catalog[$barcode]['stock'] - $qty);
+
+        Cache::put(self::CACHE_KEY, $catalog, self::TTL);
+    }
+
+    /**
+     * Decrement stock for order
+     */
     public function decrementForOrder(Order $order): void
     {
-        $items = $order->relationLoaded('items')
-            ? $order->items
-            : $order->items()->get();
+        $order->loadMissing('items');
 
-        foreach ($items as $item) {
-            $barcode = trim((string) ($item->barcode ?? ''));
-            if ($barcode === '') {
-                continue;
+        foreach ($order->items as $item) {
+            $barcode = trim((string)$item->barcode);
+
+            if ($barcode !== '') {
+                $this->decrementStock($barcode, (int)$item->quantity);
             }
-            $this->decrementStock($barcode, (int) $item->quantity);
         }
     }
 }

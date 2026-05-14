@@ -535,11 +535,15 @@ margin-right: 0;
     z-index: 100000!important;
 }
 
+.Patchwork-btn{
+    margin-top: 50px;
+}
+
 .swiper-button-prev,
 .swiper-button-next {
     width: 28px;
     height: 28px;
-    background: #333;
+    /* background: #333; */
     border-radius: 50%;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     display: flex;
@@ -2539,6 +2543,51 @@ table{
 }
 
 
+.btnposition-desctop-home-1{
+    position: absolute; 
+	margin-top: 870px!important; 
+	right: 34%;
+}
+
+.btnposition-desctop-home-2{
+    position: absolute; 
+	margin-top: 564px!important; 
+	right: 33%;
+}
+
+
+/* ===== Desktop / Mobile Toggle ===== */
+
+.desktop-only-section{
+    display:block;
+}
+
+.mobile-only-section{
+    display:none;
+}
+
+@media (max-width:768px){
+
+    .desktop-only-section{
+        display:none !important;
+    }
+
+    .mobile-only-section{
+        display:block !important;
+    }
+
+    .image-hover-content-topLink span a{
+        font-size: 1.6rem!important;
+        text-decoration: underline;
+    }
+
+    .image-hover-content-cottonSareeLink span a{
+       font-size: 1.6rem!important;
+        text-decoration: underline;
+        
+    }
+
+}
 
 /* রেসপন্সিভ */
 @media (max-width: 991px) {
@@ -2555,35 +2604,3 @@ table{
         float: none;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

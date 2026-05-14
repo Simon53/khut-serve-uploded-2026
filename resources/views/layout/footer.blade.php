@@ -1,4 +1,4 @@
-      <footer class="footer topGap-1">
+      <footer class="footer topGap-1 footet-mobile-postion">
          <div class="ribon"></div>
          <div class="d-flex justify-content-center py-1 py-bottm">
             <img src="{{asset('/images/top-logo.png')}}" class="img-fluid mt-4 mt-4Moblile" alt="..." style="width:60px">  
@@ -15,7 +15,7 @@
             <!--a href="https://www.youtube.com/@khutart" target="_blank"><img src="{{asset('/images/youtube.png')}}" class="img-fluid p-1" alt="..."></a-->       
          </div>
          <div class="py-1 text-center teadeClass">
-             khut.art.bangladesh@gmail.com<br>
+             info@khut.shop<br>
             <p>Trade Licence No.: TRAD/DNCC/072364/2022</p>      
          </div>
          <div class="ribon-bottom" style="margin-top:-10px"></div>

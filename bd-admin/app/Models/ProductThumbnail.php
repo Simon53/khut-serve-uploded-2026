@@ -20,8 +20,7 @@ class ProductThumbnail extends Model
         'thumb_color',
         'thumb_size',
         'thumb_common_size',
-        'thumb_barcode'
-
+        'thumb_barcode',
     ];
 
     public function product(){

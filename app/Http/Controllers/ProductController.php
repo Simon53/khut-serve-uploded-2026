@@ -12,6 +12,7 @@ use App\Models\Iron;
 use App\Models\DryWash;
 use App\Http\Controllers\StockController;
 
+
 class ProductController extends Controller{
 
 
@@ -104,60 +105,91 @@ class ProductController extends Controller{
 
 
 
-   
 
+        
+      
 
+public function allProductsList($type) 
+    {
+        $type = strtolower($type);
+        
+        // Image base path define kora holo
+        $baseImagePath = rtrim(env('ADMIN_BASE_URL'), '/') . '/storage/';
 
-        public function allProductsList($type)
-        {
-            $decodedType = strtolower($type);
-        
-            // Column-based types
-            $validColumns = ['new_arrivals', 'patchwork', 'festive_collection'];
-        
-            if (in_array($decodedType, $validColumns)) {
-                $products = Product::where($decodedType, 'Y')
-                    ->where('published_site', 'Y')
-                    ->where('site_view_status', 'Y')
-                    ->latest()
-                    ->paginate(50);
-        
-                $showBanner = false;
-                $displayType = ucwords(str_replace('_', ' ', $decodedType));
-        
-                return view('all-products.all-products-list', compact('products', 'displayType', 'showBanner'));
-            }
-        
-            // Category-based filter (MainMenu)
-            $mainMenu = MainMenu::whereRaw('LOWER(name) = ?', [$decodedType])->first();
-        
-            if ($mainMenu) {
-                $subIds = $mainMenu->subMenus->pluck('id')->toArray();
-                $childIds = ChildMenu::whereIn('sub_menu_id', $subIds)->pluck('id')->toArray();
-        
-                $products = Product::where('published_site', 'Y')
-                    ->where('site_view_status', 'Y')
-                    ->where(function($q) use ($mainMenu, $subIds, $childIds) {
-                        $q->where('main_menu_id', $mainMenu->id)
-                          ->orWhereIn('sub_menu_id', $subIds)
-                          ->orWhereIn('child_menu_id', $childIds);
-                    })
-                    ->latest()
-                    ->paginate(50);
-        
-                $showBanner = true;
-                $displayType = $mainMenu->name;
-        
-                return view('all-products.all-products-list', compact('products', 'displayType', 'showBanner'));
-            }
-        
-            // Column নেই + category নেই → empty collection
-            $products = collect(); 
-            $showBanner = false;
-            $displayType = ucwords(str_replace('-', ' ', $type));
-        
-            return view('all-products.all-products-list', compact('products', 'displayType', 'showBanner'));
+        $typeMap = [
+            'new-arrivals' => 'new_arrivals',
+            'patchwork' => 'patchwork',
+            'festive-collection' => 'festive_collection',
+        ];
+
+        /* ======================================================
+           ✅ Random Banner Logic
+        ====================================================== */
+        $bannerRecord = CategoryBanner::inRandomOrder()->first();
+
+        if ($bannerRecord && !empty($bannerRecord->banner_image)) {
+            $cleanPath = preg_replace('#^/?storage/#', '', $bannerRecord->banner_image);
+            $bannerPath = '/storage/' . $cleanPath;
+            $bannerTitle = $bannerRecord->title ?? 'Shop';
+        } else {
+            $bannerPath = '/storage/category_banners/product_banner.jpg';
+            $bannerTitle = 'Shop';
         }
+
+        $category = (object)[
+            'name'   => ucwords(str_replace('-', ' ', $type)),
+            'banner' => $bannerPath,
+            'title'  => $bannerTitle
+        ];
+
+        /* ===============================
+           ✅ Data Fetching
+        =============================== */
+        if (array_key_exists($type, $typeMap)) {
+            $column = $typeMap[$type];
+
+            $products = Product::where($column, 'Y')
+                ->where('published_site', 'Y')
+                ->where('site_view_status', 'Y')
+                ->latest()
+                ->paginate(50);
+
+            $displayType = $category->name;
+            $urlType = $type;
+            $showBanner = true;
+
+            return view('all-products.all-products-list', compact(
+                'products', 'displayType', 'urlType', 'showBanner', 'category', 'baseImagePath'
+            ));
+        }
+
+        // Category Based Filter
+        $decodedType = str_replace('-', ' ', $type);
+        $mainMenu = MainMenu::whereRaw('LOWER(name) = ?', [$decodedType])->first();
+
+        if ($mainMenu) {
+            $subIds = $mainMenu->subMenus->pluck('id')->toArray();
+            $childIds = ChildMenu::whereIn('sub_menu_id', $subIds)->pluck('id')->toArray();
+
+            $products = Product::where('published_site', 'Y')
+                ->where('site_view_status', 'Y')
+                ->where(function($q) use ($mainMenu, $subIds, $childIds) {
+                    $q->where('main_menu_id', $mainMenu->id)
+                    ->orWhereIn('sub_menu_id', $subIds)
+                    ->orWhereIn('child_menu_id', $childIds);
+                })->latest()->paginate(50);
+
+            $displayType = $mainMenu->name;
+            $urlType = $type;
+            $showBanner = true;
+
+            return view('all-products.all-products-list', compact(
+                'products', 'displayType', 'urlType', 'showBanner', 'category', 'baseImagePath'
+            ));
+        }
+
+        return redirect('/');
+    }
         
 
 
