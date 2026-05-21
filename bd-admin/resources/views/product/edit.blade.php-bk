@@ -523,47 +523,35 @@
                         </h6>
                      </div>
                      <div id="collapseCategory" class="collapse show" data-parent="#accordionOptions">
-                        <div class="form-group">
-    <label>Main Menu</label>
-    <select name="main_menu_id" id="mainMenuSelect" class="form-control" required>
-        <option value="">Select Main Menu</option>
-
-        @foreach($mainMenus as $main)
-            <option value="{{ $main->id }}"
-                {{ $product->main_menu_id == $main->id ? 'selected' : '' }}>
-                {{ $main->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
-<div class="form-group">
-    <label>Sub Menu</label>
-    <select name="sub_menu_id" id="subMenuSelect" class="form-control">
-        <option value="">Select Sub Menu</option>
-
-        @foreach($subMenus->where('main_menu_id', $product->main_menu_id) as $sub)
-            <option value="{{ $sub->id }}"
-                {{ $product->sub_menu_id == $sub->id ? 'selected' : '' }}>
-                {{ $sub->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
-
-<div class="form-group">
-    <label>Child Menu</label>
-    <select name="child_menu_id" id="childMenuSelect" class="form-control">
-        <option value="">Select Child Menu</option>
-
-        @foreach($childMenus->where('sub_menu_id', $product->sub_menu_id) as $child)
-            <option value="{{ $child->id }}"
-                {{ $product->child_menu_id == $child->id ? 'selected' : '' }}>
-                {{ $child->name }}
-            </option>
-        @endforeach
-    </select>
-</div>
+                        <div class="card-body">
+                           <div class="form-group">
+                              <label>Main Menu</label>
+                              <select name="main_menu_id" id="mainMenuSelect" class="form-control" required>
+                                 <option value="">Select Main Menu</option>
+                                 @foreach($mainMenus as $main)
+                                 <option value="{{ $main->id }}" {{ $product->main_menu_id == $main->id ? 'selected' : '' }}>{{ $main->name }}</option>
+                                 @endforeach
+                              </select>
+                           </div>
+                           <div class="form-group">
+                              <label>Sub Menu</label>
+                              <select name="sub_menu_id" id="subMenuSelect" class="form-control">
+                                 <option value="">Select Sub Menu</option>
+                                 @foreach($subMenus as $sub)
+                                 <option value="{{ $sub->id }}" {{ $product->sub_menu_id == $sub->id ? 'selected' : '' }}>{{ $sub->name }}</option>
+                                 @endforeach
+                              </select>
+                           </div>
+                           <div class="form-group">
+                              <label>Child Menu</label>
+                              <select name="child_menu_id" id="childMenuSelect" class="form-control">
+                                 <option value="">Select Child Menu</option>
+                                 @foreach($childMenus as $child)
+                                 <option value="{{ $child->id }}" {{ $product->child_menu_id == $child->id ? 'selected' : '' }}>{{ $child->name }}</option>
+                                 @endforeach
+                              </select>
+                           </div>
+                        </div>
                      </div>
                   </div>
                     
@@ -1103,6 +1091,21 @@ $(document).ready(function() {
    
    
 
+     // Open modal & load existing options
+    /*  $(document).on('click', '.add-thumb-option', function () {
+         activeThumbEl = $(this).closest('.thumbnail-wrapper');
+
+         // Clear modal rows
+         $('#thumbOptionRows').html('');
+
+         // Load existing options
+         const existingOptions = activeThumbEl.data('options') || [];
+         existingOptions.forEach(opt => {
+            $('#thumbOptionRows').append(generateOptionRow(allCommonSizes, allBodySizes, opt));
+         });
+
+         $('#thumbOptionModal').modal('show');
+      });*/
       
       
     $(document).on('click', '.add-thumb-option', function () {
@@ -1251,27 +1254,8 @@ $(document).ready(function() {
    });
    
   
-  
-  
 
     // Menu Cascading
-    $(document).ready(function () {
-
-    if ($('#subMenuSelect option').length > 1) {
-        $('#subMenuSelect').prop('disabled', false);
-    } else {
-        $('#subMenuSelect').prop('disabled', true);
-    }
-
-    if ($('#childMenuSelect option').length > 1) {
-        $('#childMenuSelect').prop('disabled', false);
-    } else {
-        $('#childMenuSelect').prop('disabled', true);
-    }
-
-});
-    
-    
    $('#mainMenuSelect').on('change', function () {
        const mainId = $(this).val();
        const subMenuSelect = $('#subMenuSelect').empty().append('<option value="">Select Sub Menu</option>');

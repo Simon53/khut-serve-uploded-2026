@@ -42,7 +42,7 @@
 .btnposition-desctop-home-1{
    position: absolute; 
    /*margin-top: 460px!important; */
-   margin-top: 490px!important; 
+   margin-top: 440px!important; 
    right: 40%;
    /*z-index: 1000;*/
 }
@@ -213,13 +213,7 @@ margin-bottom: 40px;
     }
 }
 
-@media (max-width: 320px) {
-    .btnposition-desctop-home-1{
-       position: absolute;
-       margin-top: 504px;
-       right: 40%; /* adjust if needed */
-    }
-}
+
 
 @media (min-width: 769px) {
 

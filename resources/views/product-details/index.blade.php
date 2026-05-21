@@ -162,17 +162,23 @@
                     <p class="mt-4">{!! $product->details !!}</p>
                 </div>
 
-                <div class="deliveryInfo">
-                    <b>Delivery Charge</b>
-                    <p>Inside Dhaka: <span>BDT 80.</span></p>
-                    <p>Outside Dhaka: <span>BDT 150.</span></p>
-                </div>
+                @php
+                    $isExplore = $product->link_status === 'Explore';
+                @endphp
 
-                <div class="deliveryInfo mt-1">
-                    <b>Delivery Time</b>
-                    <p>Inside Dhaka: <span>3-5 working days.</span></p>
-                    <p>Outside Dhaka: <span>5-7 working days.</span></p>
-                </div>
+                @if(!$isExplore)
+                    <div class="deliveryInfo">
+                        <b>Delivery Charge</b>
+                        <p>Inside Dhaka: <span>BDT 80.</span></p>
+                        <p>Outside Dhaka: <span>BDT 150.</span></p>
+                    </div>
+
+                    <div class="deliveryInfo mt-1">
+                        <b>Delivery Time</b>
+                        <p>Inside Dhaka: <span>3-5 working days.</span></p>
+                        <p>Outside Dhaka: <span>5-7 working days.</span></p>
+                    </div>
+                @endif
 
                 <div class="deliveryInfo mt-4 aboutProduct">
                     <b>Care</b>
@@ -375,25 +381,30 @@
 
           @forelse($relatedProducts as $related)
 
-            @php
-                // ===== API STOCK LOGIC (Same as categories) =====
-                $primaryBarcode = null;
+           @php
+                    $primaryBarcode = null;
 
-                $firstThumb = $related->thumbnails->first();
-                if ($firstThumb && $firstThumb->thumb_barcode) {
-                    $primaryBarcode = trim((string) $firstThumb->thumb_barcode);
-                }
-
-                if (!$primaryBarcode) {
-                    $mainSku = trim((string) ($related->product_barcode ?? ''));
-                    if ($mainSku !== '') {
-                        $primaryBarcode = $mainSku;
+                    $firstThumb = $related->thumbnails->first();
+                    if ($firstThumb && $firstThumb->thumb_barcode) {
+                        $primaryBarcode = trim((string) $firstThumb->thumb_barcode);
                     }
-                }
 
-                $apiStock = $primaryBarcode ? (int)($khutCatalog[$primaryBarcode]['stock'] ?? 0) : 0;
-                $inStock = $apiStock > 0;
-            @endphp
+                    if (!$primaryBarcode) {
+                        $mainSku = trim((string) ($related->product_barcode ?? ''));
+                        if ($mainSku !== '') {
+                            $primaryBarcode = $mainSku;
+                        }
+                    }
+
+                    $apiStock = $primaryBarcode ? (int)($khutCatalog[$primaryBarcode]['stock'] ?? 0) : 0;
+                    $inStock = $apiStock > 0;
+                @endphp
+
+                {{-- 🔥 এই লাইনটাই main fix --}}
+                @if(!$inStock)
+                    @continue
+                @endif
+            
 
             <!-- Each Product Card -->
             <div class="swiper-slide p-2">
@@ -714,14 +725,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ===================== IMAGE ZOOM =====================
-    $(document).ready(function () {
-        const zoomScale = 2.5;
+   $(document).ready(function () {
 
-        $(".img-zoom-container").mousemove(function (e) {
-            const img = $(this).find("img");
+    const zoomScale = 2.5;
+    const imgContainer = $(".img-zoom-container");
+    const img = $(".img-zoom-container img");
+
+    let mobileZoomed = false;
+
+    // ===================== DESKTOP ZOOM (UNCHANGED) =====================
+    if (window.innerWidth > 768) {
+
+        imgContainer.mousemove(function (e) {
             let offset = $(this).offset();
             let x = e.pageX - offset.left;
             let y = e.pageY - offset.top;
+
             let width = $(this).width();
             let height = $(this).height();
 
@@ -734,13 +753,102 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        $(".img-zoom-container").mouseleave(function () {
-            $(this).find("img").css({
+        imgContainer.mouseleave(function () {
+            img.css({
                 "transform": "scale(1)",
                 "transform-origin": "center center"
             });
         });
+    }
+
+    // ===================== MOBILE ZOOM + DRAG =====================
+if (window.innerWidth <= 768) {
+
+    let zoomed = false;
+    let startX = 0;
+    let startY = 0;
+    let moveX = 0;
+    let moveY = 0;
+
+    const img = $(".img-zoom-container img");
+    const container = $(".img-zoom-container");
+
+    const ZOOM = 2.5;
+
+    function setTransform() {
+        img.css({
+            "transform": `scale(${ZOOM}) translate(${moveX}px, ${moveY}px)`,
+            "transform-origin": "center center",
+            "transition": zoomed ? "none" : "transform 0.25s ease"
+        });
+    }
+
+    // ===================== TAP TOGGLE ZOOM =====================
+    container.on("click", function () {
+
+        // prevent accidental click after drag
+        if (!zoomed && (Math.abs(moveX) > 10 || Math.abs(moveY) > 10)) return;
+
+        if (!zoomed) {
+            zoomed = true;
+            moveX = 0;
+            moveY = 0;
+            setTransform();
+        } else {
+            zoomed = false;
+            moveX = 0;
+            moveY = 0;
+
+            img.css({
+                "transform": "scale(1) translate(0px, 0px)",
+                "transition": "transform 0.3s ease"
+            });
+        }
     });
+
+    // ===================== TOUCH START =====================
+    container.on("touchstart", function (e) {
+        if (!zoomed) return;
+
+        const touch = e.originalEvent.touches[0];
+        startX = touch.pageX - moveX;
+        startY = touch.pageY - moveY;
+    });
+
+    // ===================== TOUCH MOVE =====================
+    container.on("touchmove", function (e) {
+        if (!zoomed) return;
+
+        e.preventDefault(); // stop page scroll
+
+        const touch = e.originalEvent.touches[0];
+
+        moveX = touch.pageX - startX;
+        moveY = touch.pageY - startY;
+
+        // ===================== BOUNDARY FIX =====================
+        const maxMove = 150; // limit so image never goes outside too far
+
+        if (moveX > maxMove) moveX = maxMove;
+        if (moveX < -maxMove) moveX = -maxMove;
+        if (moveY > maxMove) moveY = maxMove;
+        if (moveY < -maxMove) moveY = -maxMove;
+
+        setTransform();
+    });
+
+    // ===================== TOUCH END =====================
+    container.on("touchend", function () {
+        if (!zoomed) return;
+
+        // small snap back effect (optional)
+        img.css({
+            "transition": "transform 0.2s ease"
+        });
+    });
+}
+
+});
     
     
     

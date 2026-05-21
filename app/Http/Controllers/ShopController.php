@@ -57,69 +57,223 @@ class ShopController extends Controller
 {
     $mainMenus = MainMenu::with('subMenus.childMenus')->get();
 
-    // ❌ আগে paginate করবা না
-    $products = Product::where('published_site', 'Y')
+    /*
+    |--------------------------------------------------------------------------
+    | Get All Products
+    |--------------------------------------------------------------------------
+    */
+    $products = Product::with(['thumbnails', 'options'])
+        ->where('published_site', 'Y')
         ->latest()
-        ->get(); // ✅ get()
+        ->get();
 
-    // 🔥 Khut catalog
+
+    /*
+    |--------------------------------------------------------------------------
+    | Khut Catalog
+    |--------------------------------------------------------------------------
+    */
     $khutCatalog = app(\App\Services\KhutCatalogService::class)->all();
 
-    // normalize barcode
+    /*
+    |--------------------------------------------------------------------------
+    | Normalize Barcode
+    |--------------------------------------------------------------------------
+    */
     $khutCatalogNorm = [];
+
     foreach($khutCatalog as $barcode => $item) {
+
         $khutCatalogNorm[ltrim((string)$barcode,'0')] = $item;
+
     }
 
-    // ✅ SORT (in-stock first)
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove Product Without Barcode
+    |--------------------------------------------------------------------------
+    */
+    $products = $products->filter(function($product){
+
+        return !empty($product->product_barcode);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sort Products
+    |--------------------------------------------------------------------------
+    */
     $sorted = $products->sortByDesc(function($product) use ($khutCatalogNorm) {
 
-        $barcode = $product->thumbnails->first()?->thumb_barcode 
-                ?: $product->product_barcode 
-                ?: null;
+        $allBarcodes = [];
 
-        if (!$barcode) return 0;
+        /*
+        |--------------------------------------------------------------------------
+        | Main Barcode
+        |--------------------------------------------------------------------------
+        */
+        if (!empty($product->product_barcode)) {
 
-        $stock = (int)($khutCatalogNorm[ltrim($barcode,'0')]['stock'] ?? 0);
+            $allBarcodes[] = $product->product_barcode;
 
-        return $stock > 0 ? 1 : 0;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Thumbnail Barcode
+        |--------------------------------------------------------------------------
+        */
+        foreach ($product->thumbnails as $thumb) {
+
+            if (!empty($thumb->thumb_barcode)) {
+
+                $allBarcodes[] = $thumb->thumb_barcode;
+
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Option Barcode
+        |--------------------------------------------------------------------------
+        */
+        foreach ($product->options as $option) {
+
+            if (!empty($option->barcode)) {
+
+                $allBarcodes[] = $option->barcode;
+
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remove Duplicate
+        |--------------------------------------------------------------------------
+        */
+        $allBarcodes = array_unique($allBarcodes);
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Default
+        |--------------------------------------------------------------------------
+        */
+        $inStock = false;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check Stock
+        |--------------------------------------------------------------------------
+        */
+        foreach ($allBarcodes as $barcode) {
+
+            $barcodeNorm = ltrim($barcode, '0');
+
+            $stock = (int)($khutCatalogNorm[$barcodeNorm]['stock'] ?? 0);
+
+            if ($stock > 0) {
+
+                $inStock = true;
+
+                break;
+            }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | Priority
+        |--------------------------------------------------------------------------
+        |
+        | In Stock Product => Large Priority
+        | Sold Out Product => Low Priority
+        |
+        */
+
+        return ($inStock ? 1000000000 : 0) + $product->id;
+
     })->values();
 
-    // ✅ MANUAL PAGINATION
+
+    /*
+    |--------------------------------------------------------------------------
+    | Manual Pagination
+    |--------------------------------------------------------------------------
+    */
     $currentPage = request()->get('page', 1);
+
     $perPage = 50;
 
     $products = new \Illuminate\Pagination\LengthAwarePaginator(
-        $sorted->forPage($currentPage, $perPage),
+
+        $sorted->forPage($currentPage, $perPage)->values(),
+
         $sorted->count(),
+
         $perPage,
+
         $currentPage,
-        ['path' => request()->url()]
+
+        [
+            'path' => request()->url(),
+            'query' => request()->query(),
+        ]
+
     );
 
-    $products->appends(request()->query());
 
-    // ✅ Banner
+    /*
+    |--------------------------------------------------------------------------
+    | Banner
+    |--------------------------------------------------------------------------
+    */
     $bannerRecord = CategoryBanner::inRandomOrder()->first();
 
     if ($bannerRecord && !empty($bannerRecord->banner_image)) {
+
         $cleanPath = preg_replace('#^/?storage/#', '', $bannerRecord->banner_image);
+
         $bannerPath  = '/storage/' . $cleanPath;
+
         $bannerTitle = $bannerRecord->title ?? 'Shop';
+
     } else {
+
         $bannerPath  = '/storage/category_banners/product_banner.jpg';
+
         $bannerTitle = 'Shop';
     }
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | Category Object
+    |--------------------------------------------------------------------------
+    */
     $category = (object)[
+
         'name'   => 'Shop',
+
         'banner' => $bannerPath,
+
         'title'  => $bannerTitle
+
     ];
 
-    return view('product-categories.index', compact('mainMenus', 'products', 'category'));
-}
 
+    return view(
+        'product-categories.index',
+        compact('mainMenus', 'products', 'category')
+    );
+}
 
 
 

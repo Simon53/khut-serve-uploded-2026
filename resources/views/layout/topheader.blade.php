@@ -85,19 +85,19 @@
 </div>
 
      
-      <nav class="navbar navbar-expand-sm sticky-top navbar-light" style="margin-top: -7px; margin-bottom: -7px;">
-          <div class="ribon d-flex justify-content-between align-items-center ribotTOP">
-            <div class="clr"></div>
-           
-            <!-- Language Switch Button -->
-            <!--div class="container">
-                <div class="d-flex justify-content-end custom-menu">
-                    <button class="btn btn-sm"  onclick="setLanguage('en')">EN</button>
-                    <button class="btn btn-sm " onclick="switchLanguage('fr')">FR</button>
-                </div>
-            </div-->
-          </div>
-        </nav>
+<nav class="navbar navbar-expand-sm sticky-top navbar-light" style="margin-top: -7px; margin-bottom: -7px;">
+      <div class="ribon d-flex justify-content-between align-items-center ribotTOP">
+      <div class="clr"></div>
+      
+      <!-- Language Switch Button -->
+      <!--div class="container">
+            <div class="d-flex justify-content-end custom-menu">
+               <button class="btn btn-sm"  onclick="setLanguage('en')">EN</button>
+               <button class="btn btn-sm " onclick="switchLanguage('fr')">FR</button>
+            </div>
+      </div-->
+      </div>
+   </nav>
         
        
 

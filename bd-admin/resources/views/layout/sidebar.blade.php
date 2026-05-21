@@ -35,7 +35,7 @@
               <span class="menu-icon">
                 <i class="mdi mdi-account-multiple"></i>
               </span>
-              <span class="menu-title">Create User</span>
+              <span class="menu-title">User Management</span>
             </a>
           </li>
           <li class="nav-item menu-items">

@@ -226,9 +226,9 @@ Route::get('/logout', [LoginAdminController::class, 'onLogout']);
 //admin user rout
 Route::get('/user', [LoginAdminController::class, 'index'])->name('user.index')->middleware(LoginCheckMiddleware::class);
 Route::post('/users/store', [LoginAdminController::class, 'store'])->name('user.store')->middleware(LoginCheckMiddleware::class);
-Route::get('/user/edit/{id}', [LoginAdminController::class, 'edit'])->name('user.edit')->middleware(LoginCheckMiddleware::class);
-Route::post('/user/update/{id}', [LoginAdminController::class, 'update'])->name('user.update')->middleware(LoginCheckMiddleware::class);
-Route::delete('/user/delete/{id}', [LoginAdminController::class, 'destroy'])->name('user.delete')->middleware(LoginCheckMiddleware::class);
+Route::get('/bd-admin/user/edit/{id}', [LoginAdminController::class, 'edit'])->name('user.edit')->middleware(LoginCheckMiddleware::class);
+Route::post('/bd-admin/user/update/{id}', [LoginAdminController::class, 'update'])->name('user.update')->middleware(LoginCheckMiddleware::class);
+Route::delete('/bd-admin/user/delete/{id}', [LoginAdminController::class, 'destroy'])->name('user.delete')->middleware(LoginCheckMiddleware::class);
 
 
 

@@ -84,7 +84,6 @@
                     <tr>
                         <th>SL</th>
                         <th>Order ID</th>
-                        <th>Image</th>
                         <th>Customer</th>
                         <th>Product Name</th>
                         <th>Order Date</th>
@@ -101,30 +100,13 @@
                     @foreach($orders as $order)
                     <tr id="orderRow{{ $order->id }}">
                         <td>{{ $loop->iteration }}</td>
-
                         
                          <td>
                             <a href="{{ route('orders.show', $order->id) }}">
                                 {{ $order->id }} 
                             </a>
                         </td>
-
-                       @php
-                            $firstItem = $order->items->first();
-                            $product = $firstItem?->product;
                         
-                            $baseUrl = 'https://khut.shop/bd-admin/public';
-                        
-                            $image = ($product && $product->main_image)
-                                ? $baseUrl . '/storage/' . ltrim($product->main_image, '/')
-                                : asset('no-image.png');
-                        @endphp
-
-                        <td>
-                            <img src="{{ $image }}"
-                                style="border-radius:4px; width:60px; height:auto">
-                        </td>
-                         
                         <td>
                             <a href="{{ route('orders.show', $order->id) }}">
                                 {{ $order->first_name }} {{ $order->last_name }}

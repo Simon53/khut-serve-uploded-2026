@@ -1,16 +1,38 @@
 
 
 
-<!-- ===== Slider Start ===== -->
+  <!-- ===== Slider Start ===== -->
       <div class="slider-container">
         <!-- Carousel -->
         <div id="customCarousel" class="carousel slide" data-bs-ride="carousel">
              <div class="carousel-inner">
-                  @foreach($sliders as $key => $slider)
+                  <!-- @foreach($sliders as $key => $slider)
                         <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                            <img src="{{ $slider->full_image }}" class="sliderImgSize" alt="Slide {{ $key + 1 }}">
                         </div>
-                    @endforeach
+                    @endforeach -->
+
+                    @foreach($sliders as $key => $slider)
+
+                      <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                             {{-- ===== Embed Video (YouTube / Facebook) ===== --}}
+                        @if($slider->video_url)
+
+                            <iframe class="sliderImgSize" src="{{ $slider->video_url }}" frameborder="0" allow="autoplay; encrypted-media"
+                                allowfullscreen>
+                            </iframe>
+
+                           @elseif(Str::endsWith($slider->full_image, ['.mp4', '.webm', '.mov', '.avi']))
+                              <video class="sliderImgSize" autoplay muted loop playsinline>
+                                  <source src="{{ $slider->full_image }}">
+                              </video>
+                          @else
+                            <img src="{{ $slider->full_image }}" class="sliderImgSize" alt="Slide {{ $key + 1 }}">
+                          @endif
+
+                      </div>
+
+                  @endforeach
              </div>
 
              <!-- Controls -->
@@ -69,4 +91,95 @@
     underModal.show();
   });
 </script-->
+
+
+<!-- ===== Popup Modal Start ===== -->
+<!-- ===== Popup Modal Start ===== -->
+<div 
+    class="modal fade" 
+    id="homePopupModal" 
+    tabindex="-1" 
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 bg-transparent shadow-none">
+
+            <!-- Image -->
+            <div class="position-relative text-center">
+                <img 
+                    src="{{ asset('images/popup-image.jpg') }}" 
+                    alt="Popup Image"
+                    class="img-fluid rounded-3 popup-image"
+                >
+
+                <!-- Processed Button -->
+                <button 
+                    type="button"
+                    class="btn popup-close-btn"
+                    data-bs-dismiss="modal"
+                >
+                    Processed
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ===== Popup Modal End ===== -->
+
+
+<!-- ===== Auto Show Modal ===== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        let popupModal = new bootstrap.Modal(
+            document.getElementById('homePopupModal')
+        );
+
+        popupModal.show();
+    });
+</script>
+
+
+<!-- ===== Popup Style ===== -->
+<style>
+    .popup-image{
+        width: 100%;
+        border-radius: 20px;
+    }
+
+    .popup-close-btn{
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #000;
+        color: #fff;
+        padding: 12px 35px;
+        font-size: 20px;
+        font-weight: 600;
+        border-radius: 50px;
+        border: none;
+        transition: 0.3s;
+        z-index: 10;
+    }
+
+    .popup-close-btn:hover{
+        background: #222;
+        color: #fff;
+    }
+
+    .modal-content{
+        background: transparent !important;
+    }
+
+    @media(max-width: 576px){
+        .popup-close-btn{
+            font-size: 16px;
+            padding: 10px 28px;
+            bottom: 80px;
+        }
+    }
+</style>
       

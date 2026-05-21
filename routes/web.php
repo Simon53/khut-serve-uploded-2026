@@ -17,37 +17,6 @@ use App\Http\Controllers\SslCommerzPaymentController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\WishlistController;
 
-// for connect stock db code
-// //use Illuminate\Support\Facades\DB;
-// Route::get('/tables', function () {
-
-//     return DB::connection('stockbd')
-//         ->select('SHOW TABLES');
-
-// });
-
-// Route::get('/stock', function () {
-
-//     $data = DB::connection('stockbd')
-//         ->table('sale_items')
-//         ->select(
-//             'SALE_ITEM_NO',
-//             'BARCODE',
-//             'NAME',
-//             'SALE_RATE',
-//             'STORE_STOCK',
-//             'CURRENT_STOCK'
-//         )
-//         ->get();
-
-//     return response()->json($data);
-// });
-// //http://127.0.0.1:8000/stock
-
-//Route::get('/category/main/{id}', [CategoryController::class, 'mainCategory'])->name('category.main');
-//Route::get('/category/sub/{id}', [CategoryController::class, 'subCategory'])->name('category.sub');
-//Route::get('/category/child/{id}', [CategoryController::class, 'childCategory'])->name('category.child');
-
 //use for server imgage-view
 use Illuminate\Support\Facades\Response;
 //use Illuminate\Support\Facades\Route;
@@ -71,7 +40,6 @@ Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
     return response($file, 200)->header("Content-Type", $type);
 });
 
-Route::get('/category/{type}/{slug}', [CategoryController::class, 'index'])->name('category.list');
 
 Route::get('/log-visitor', [VisitorController::class, 'logVisitor']);
 Route::get('/home', [HomeController::class, 'index']);
@@ -211,8 +179,6 @@ Route::post('/checkout/pay', [SslCommerzPaymentController::class, 'checkoutPayme
 Route::match(['get', 'post'], '/success', [SslCommerzPaymentController::class, 'success'])->name('payment.success');
 Route::match(['get', 'post'], '/fail', [SslCommerzPaymentController::class, 'fail'])->name('payment.fail');
 Route::match(['get', 'post'], '/cancel', [SslCommerzPaymentController::class, 'cancel'])->name('payment.cancel');
-
-Route::post('/order/store', [OrderController::class, 'store'])->name('order.store');
 
 Route::post('/ipn', [SslCommerzPaymentController::class, 'ipn']);
 //SSLCOMMERZ END

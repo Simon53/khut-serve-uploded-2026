@@ -321,15 +321,10 @@
 
                               <div class="image-hover-content-topLink mobile-span">
 
-                                    {{-- CATEGORY --}}
-                                    <a href="{{ $categoryRoute }}" style="display:none">
-                                       {{ $categoryName }}:
+                                    {{-- CATEGORY NAME --}}
+                                    <a href="{{ $categoryRoute }}">
+                                       {{ $categoryName }}
                                     </a>
-
-                                    {{-- PRODUCT NAME --}}
-                                    <span><a href="{{ route('product.details', $product->slug) }}">
-                                      {{ $product->name_en }}
-                                    </a></span>
 
                                     <p class="custom-link">
                                           @if($product->link_status === 'Add to Cart')
@@ -363,15 +358,10 @@
 
                            <div class="image-hover-content-cottonSareeLink">
 
-                              {{-- CATEGORY --}}
-                              <a href="{{ $categoryRoute }}" style="display:none">
+                              {{-- CATEGORY NAME --}}
+                              <a href="{{ $categoryRoute }}">
                                     {{ $categoryName }}
                               </a>
-
-                              {{-- PRODUCT NAME --}}
-                              <span><a href="{{ route('product.details', $product->slug) }}">
-                                   {{ $product->name_en }}
-                              </a></span>
 
                               <p class="custom-link">
                                  @if($product->link_status === 'Add to Cart')
@@ -430,15 +420,10 @@
 
             <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
 
-               {{-- CATEGORY --}}
-               <a href="{{ $categoryRoute }}" style="display:none">
+               {{-- CATEGORY NAME --}}
+               <a href="{{ $categoryRoute }}">
                   {{ $categoryName }}
                </a>
-
-               {{-- PRODUCT NAME --}}
-               <span><a href="{{ route('product.details', $highlightFour->slug) }}">
-                  {{ $highlightFour->name_en }}
-               </a></span>
                
             <p class="custom-link">
                   @if($highlightFour->link_status === 'Add to Cart')
@@ -537,7 +522,7 @@
                                Add to Cart
                             </a>
                        @else
-                            <a href="{{ route('product.details', $featureTwoProduct->slug) }}">Shop More</a>
+                            <a href="{{ route('product.details', $featureTwoProduct->slug) }}">Select Option</a>
                        @endif
                     </p>
                   </div>

@@ -73,10 +73,7 @@
             <div class="modal-body">
                <div class="form-group">
                   <label>Slider Image</label>
-                  <input type="file" name="slider_image" id="sliderImage" class="form-control" accept="image/*,video/*" >
-                  <br/><br/>
-                  or<br/><br/>
-                  <input type="text" name="video_url" class="form-control" placeholder="YouTube / Facebook Embed URL">
+                  <input type="file" name="slider_image" id="sliderImage" class="form-control" required>
                </div>
                <div class="form-check">
                   <input type="checkbox" class="form-check-input" name="is_active" id="isActive">
@@ -131,127 +128,37 @@
 
     // Add slider
     $('#addSliderForm').submit(function(e){
+        e.preventDefault();
+        //alert('Form submitted');
+        let formData = new FormData(this);
+        $.ajax({
+            url: "{{ url('/slider/store') }}",
+            type: 'POST',
+            data: formData,
+            headers: { 'X-CSRF-TOKEN': token },
+            contentType: false,
+            processData: false,
+            success: function(res){
+                if(res.status=='success'){
+                    toastr.success(res.message);
+                    $('#addSliderModal').modal('hide');
 
-    e.preventDefault();
-
-    let formData = new FormData(this);
-
-    $.ajax({
-
-        url: "{{ url('/slider/store') }}",
-
-        type: 'POST',
-
-        data: formData,
-
-        headers: {
-            'X-CSRF-TOKEN': token
-        },
-
-        contentType: false,
-
-        processData: false,
-
-        success: function(res){
-
-            if(res.status == 'success'){
-
-                toastr.success(res.message);
-
-                $('#addSliderModal').modal('hide');
-
-                let media = '';
-
-                // embed video
-                if(res.slider.video_url){
-
-                    media = `
-                        <iframe
-                            src="${res.slider.video_url}"
-                            width="120"
-                            height="80"
-                            frameborder="0"
-                            allowfullscreen>
-                        </iframe>
-                    `;
-
-                }
-
-                // uploaded video
-                else if(
-                    res.slider.url &&
-                    (
-                        res.slider.url.endsWith('.mp4') ||
-                        res.slider.url.endsWith('.webm') ||
-                        res.slider.url.endsWith('.mov') ||
-                        res.slider.url.endsWith('.avi')
-                    )
-                ){
-
-                    media = `
-                        <video width="120" controls>
-                            <source src="${res.slider.url}">
-                        </video>
-                    `;
-
-                }
-
-                // image
-                else {
-
-                    media = `
-                        <img src="${res.slider.url}" style="width:100px">
-                    `;
-                }
-
-                let row = `
-                    <tr data-id="${res.slider.id}">
-
+                    // prepend new row
+                    let row = `<tr data-id="${res.slider.id}">
                         <td>#</td>
-
-                        <td>${media}</td>
-
-                        <td>
-                            <span class="badge ${res.slider.is_active=='Yes' ? 'badge-success' : 'badge-danger'}">
-                                ${res.slider.is_active}
-                            </span>
-                        </td>
-
-                        <td>
-                            <button class="btn btn-primary editMenuBtn"
-                                    data-id="${res.slider.id}">
-                                Edit
-                            </button>
-                        </td>
-
-                        <td>
-                            <button class="btn btn-danger btn-sm deleteMenuBtn"
-                                    data-id="${res.slider.id}">
-                                Delete
-                            </button>
-                        </td>
-
-                    </tr>
-                `;
-
-                $('.sliderRow').prepend(row);
-
-            } else {
-
-                toastr.error(res.message);
+                        <td><img src="${res.slider.url}" style="width:100px"></td>
+                        <td><span class="badge ${res.slider.is_active=='Yes'?'badge-success':'badge-danger'}">${res.slider.is_active}</span></td>
+                        <td><button class="btn btn-primary editMenuBtn" data-id="${res.slider.id}" data-status="${res.slider.is_active}">Edit</button></td>
+                        <td><button class="btn btn-danger btn-sm deleteMenuBtn" data-id="${res.slider.id}">Delete</button></td>
+                    </tr>`;
+                    $('.sliderRow').prepend(row);
+                } else {
+                    toastr.error(res.message);
+                }
             }
-        },
-
-        error: function(xhr){
-
-            console.log(xhr.responseText);
-
-            toastr.error('Server Error');
-        }
-
+            
+        });
     });
-
-});
 
      // show modal with existing data
     $(document).on('click', '.editMenuBtn', function(){
