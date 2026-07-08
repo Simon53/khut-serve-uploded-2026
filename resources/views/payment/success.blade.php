@@ -16,12 +16,10 @@
                     @if(isset($order) && $order->payment_method == 'cod')
                         <h2 class="text-success mb-3">Order Placed Successfully!</h2>
                         <p class="text-muted mb-4">Your order has been placed successfully.You will pay cash on delivery.</p>
-                        <h4>Your order will be delivered within 3 to 7 working days.</h4>
                         <h4>Thank you for your purchase!</h4>
                     @else
                         <h2 class="text-success mb-3">Payment Successful!</h2>
                         <p class="text-muted mb-4">Your order has been placed successfully</p>
-                        <h4>Your order will be delivered within 3 to 7 working days.</h4>
                         <h4>Thank you for your purchase!</h4>
                     @endif
                     

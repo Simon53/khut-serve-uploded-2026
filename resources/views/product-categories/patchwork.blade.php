@@ -48,25 +48,31 @@
 
     <div class="container mt-2">
         <div class="bradcum-category">
-    <a href="{{ url('/') }}">Home</a> /
+            <a href="{{ url('/') }}">Home</a>
 
-    @if(!empty($mainMenu))
-        <a href="{{ url('/category/'.str_replace(' ', '-', $mainMenu->name)) }}">
-            {{ $mainMenu->name }}
-        </a> /
-    @endif
+                @if(!empty($mainMenu))
+                    /
+                    <a href="{{ url('category/'.$mainMenu->name) }}">
+                        {{ $mainMenu->name }}
+                    </a>
+                @endif
 
-    @if(!empty($subMenu))
-        <a href="{{ url('/category/'.str_replace(' ', '-', $mainMenu->name).'/'.str_replace(' ', '-', $subMenu->name)) }}">
-            {{ $subMenu->name }}
-        </a> /
-    @endif
+                @if(!empty($subMenu))
+                    /
+                    <a href="{{ url('subcategory/'.$subMenu->id) }}">
+                        {{ $subMenu->name }}
+                    </a>
+                @endif
 
-    @if(!empty($childMenu))
-        <span>{{ $childMenu->name }}</span>
-    @elseif(!empty($category))
-        <span>{{ $category->name }}</span>
-    @endif
+                @if(!empty($childMenu))
+                    /
+                    <a href="{{ url('childcategory/'.$childMenu->id) }}">
+                        {{ $childMenu->name }}
+                    </a>
+                @elseif(!empty($category))
+                    /
+                    <span>{{ $category->name }}</span>
+                @endif
 </div>
 
     </div>

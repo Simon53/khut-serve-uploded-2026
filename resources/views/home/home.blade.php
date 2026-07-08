@@ -112,160 +112,277 @@
       @endif
       <!-- ===== section end ===== -->
 
-
 <!-- =====start for desktop section start ===== -->
 <div class="container topGap-2 desktop-only-section">
+
    @php
       $order = ['highlight-one', 'highlight-two', 'highlight-three'];
    @endphp
 
    @if(isset($highlightProducts) && $highlightProducts->count())
-   
+
       <div class="row">
-            @foreach($order as $key)
-               @php 
-                  $product = $highlightProducts[$key] ?? null;
 
-                  if ($product) {
+         @foreach($order as $key)
 
-                        // Detect correct category route
-                        if ($product->childMenu) {
-                           $categoryRoute = route('childcategory.list', $product->childMenu->id);
-                           $categoryName  = $product->childMenu->name;
-                        }
-                        elseif ($product->subMenu) {
-                           $categoryRoute = route('subcategory.list', $product->subMenu->id);
-                           $categoryName  = $product->subMenu->name;
-                        }
-                        else {
-                           $categoryRoute = route('category.list', strtolower(str_replace(' ', '-', $product->mainMenu->name)));
-                           $categoryName  = $product->mainMenu->name;
-                        }
+            @php
+               $product = $highlightProducts[$key] ?? null;
+
+               if ($product) {
+
+                  /*
+                  |--------------------------------------------------------------------------
+                  | Parent Category Show Logic
+                  |--------------------------------------------------------------------------
+                  | Child থাকলে → Parent = Sub Category
+                  | Sub থাকলে   → Parent = Main Category
+                  | Main only   → Main Category
+                  */
+
+                  if ($product->childMenu) {
+
+                     // Parent = Sub Category
+                     $categoryRoute = route('subcategory.list', $product->subMenu->id ?? 0);
+                     $categoryName  = $product->subMenu->name ?? '';
 
                   }
-               @endphp
-               
-               @if($product)
-                  {{-- ===== Left Side: highlight-one ===== --}}
-                  @if($loop->first)
-                        <div class="col-lg-6 col-md-12 col-sm-12 topLink mb-2 padding-r">
-                           <div class="image-hover-wrapper">
-                              <a href="{{ route('product.details', $product->slug) }}">
-                                    <img src="{{ $baseImagePath . $product->main_image }}" class="img-resize-2 img-fluid" alt="{{ $product->name_en }}">
-                              </a>
+                  elseif ($product->subMenu) {
 
-                              <div class="image-hover-content-topLink">
-                                    <a href="{{ $categoryRoute }}">
-                                       {{ $categoryName }}
-                                    </a>
+                     // Parent = Main Category
+                     $categoryRoute = route(
+                        'category.list',
+                        strtolower(str_replace(' ', '-', $product->mainMenu->name))
+                     );
 
-                                    <p class="custom-link">
-                                          @if($product->link_status === 'Add to Cart')
-                                             <a href="#" class="addToCart"
-                                                data-id="{{ $product->id }}"
-                                                data-name="{{ $product->name_en }}"
-                                                data-price="{{ $product->price }}"
-                                                data-img="{{ $baseImagePath . $product->main_image }}"
-                                                data-product-barcode="{{ $product->product_barcode }}">
-                                                Add to Cart
-                                             </a>
-                                          @else
-                                             <a href="{{ route('product.details', $product->slug) }}">Select Options</a>
-                                          @endif
-                                    </p>
-                              </div>
-                           </div>
-                        </div>
-                  @else
-                        {{-- ===== Right Side: highlight-two & highlight-three ===== --}}
-                        @if($loop->iteration == 2)
-                           <div class="col-lg-6 col-md-12 col-sm-12 r-top-1 padding-l">
-                        @endif
+                     $categoryName = $product->mainMenu->name ?? '';
 
-                        <div class="image-hover-wrapper mb-2" @if($loop->last) style="margin-top: -16px;" @endif>
-                           <a href="{{ route('product.details', $product->slug) }}">
-                              <img src="{{ $baseImagePath . $product->main_image }}" class="img-resize-1 img-fluid" alt="{{ $product->name_en }}">
+                  }
+                  else {
+
+                     // Main Category
+                     $categoryRoute = route(
+                        'category.list',
+                        strtolower(str_replace(' ', '-', $product->mainMenu->name))
+                     );
+
+                     $categoryName = $product->mainMenu->name ?? '';
+                  }
+               }
+            @endphp
+
+            @if($product)
+
+               {{-- ===== Left Side: highlight-one ===== --}}
+               @if($loop->first)
+
+                  <div class="col-lg-6 col-md-12 col-sm-12 topLink mb-2 padding-r">
+
+                     <div class="image-hover-wrapper">
+
+                        <a href="{{ route('product.details', $product->slug) }}">
+                           <img
+                              src="{{ $baseImagePath . $product->main_image }}"
+                              class="img-resize-2 img-fluid"
+                              alt="{{ $product->name_en }}">
+                        </a>
+
+                        <div class="image-hover-content-topLink">
+
+                           <a href="{{ $categoryRoute }}">
+                              {{ $categoryName }}
                            </a>
 
-                           <div class="image-hover-content-cottonSareeLink">
-                              <a href="{{ $categoryRoute }}">
-                                    {{ $categoryName }}
-                              </a>
+                           <p class="custom-link">
 
-                              <p class="custom-link">
-                                 @if($product->link_status === 'Add to Cart')
-                                    <a href="#" class="addToCart"
-                                       data-id="{{ $product->id }}"
-                                       data-name="{{ $product->name_en }}"
-                                       data-price="{{ $product->price }}"
-                                       data-img="{{ $baseImagePath . $product->main_image }}"
-                                       data-product-barcode="{{ $product->product_barcode }}">
-                                       Add to Cart
-                                    </a>
-                                 @else
-                                    <a href="{{ route('product.details', $product->slug) }}">Select Options</a>
-                                 @endif
-                              </p>
+                              @if($product->link_status === 'Add to Cart')
 
-                           </div>
+                                 <a href="#"
+                                    class="addToCart"
+                                    data-id="{{ $product->id }}"
+                                    data-name="{{ $product->name_en }}"
+                                    data-price="{{ $product->price }}"
+                                    data-img="{{ $baseImagePath . $product->main_image }}"
+                                    data-product-barcode="{{ $product->product_barcode }}">
+                                    Add to Cart
+                                 </a>
+
+                              @else
+
+                                 <a href="{{ route('product.details', $product->slug) }}">
+                                    Select Options
+                                 </a>
+
+                              @endif
+
+                           </p>
+
                         </div>
 
-                        @if($loop->last)
-                           </div>
-                        @endif
+                     </div>
+
+                  </div>
+
+               @else
+
+                  {{-- ===== Right Side: highlight-two & highlight-three ===== --}}
+                  @if($loop->iteration == 2)
+                     <div class="col-lg-6 col-md-12 col-sm-12 r-top-1 padding-l">
                   @endif
+
+                  <div class="image-hover-wrapper mb-2"
+                     @if($loop->last)
+                        style="margin-top: -16px;"
+                     @endif>
+
+                     <a href="{{ route('product.details', $product->slug) }}">
+                        <img
+                           src="{{ $baseImagePath . $product->main_image }}"
+                           class="img-resize-1 img-fluid"
+                           alt="{{ $product->name_en }}">
+                     </a>
+
+                     <div class="image-hover-content-cottonSareeLink">
+
+                        <a href="{{ $categoryRoute }}">
+                           {{ $categoryName }}
+                        </a>
+
+                        <p class="custom-link">
+
+                           @if($product->link_status === 'Add to Cart')
+
+                              <a href="#"
+                                 class="addToCart"
+                                 data-id="{{ $product->id }}"
+                                 data-name="{{ $product->name_en }}"
+                                 data-price="{{ $product->price }}"
+                                 data-img="{{ $baseImagePath . $product->main_image }}"
+                                 data-product-barcode="{{ $product->product_barcode }}">
+                                 Add to Cart
+                              </a>
+
+                           @else
+
+                              <a href="{{ route('product.details', $product->slug) }}">
+                                 Select Options
+                              </a>
+
+                           @endif
+
+                        </p>
+
+                     </div>
+
+                  </div>
+
+                  @if($loop->last)
+                     </div>
+                  @endif
+
                @endif
-            @endforeach
+
+            @endif
+
+         @endforeach
+
       </div>
+
    @endif
 
-   {{-- ===== Highlight Four: নিচের ডিভ ===== --}}
+
+   {{-- ===== Highlight Four ===== --}}
    @php
+
       $highlightFour = $highlightProducts['highlight-four'] ?? null;
 
       if ($highlightFour) {
-            if ($highlightFour->childMenu) {
-               $categoryRoute = route('childcategory.list', $highlightFour->childMenu->id);
-               $categoryName  = $highlightFour->childMenu->name;
-            }
-            elseif ($highlightFour->subMenu) {
-               $categoryRoute = route('subcategory.list', $highlightFour->subMenu->id);
-               $categoryName  = $highlightFour->subMenu->name;
-            }
-            else {
-               $categoryRoute = route('category.list', strtolower(str_replace(' ', '-', $highlightFour->mainMenu->name)));
-               $categoryName  = $highlightFour->mainMenu->name;
-            }
+
+         /*
+         |--------------------------------------------------------------------------
+         | Parent Category Show Logic
+         |--------------------------------------------------------------------------
+         */
+
+         if ($highlightFour->childMenu) {
+
+            // Parent = Sub Category
+            $categoryRoute = route('subcategory.list', $highlightFour->subMenu->id ?? 0);
+            $categoryName  = $highlightFour->subMenu->name ?? '';
+
+         }
+         elseif ($highlightFour->subMenu) {
+
+            // Parent = Main Category
+            $categoryRoute = route(
+               'category.list',
+               strtolower(str_replace(' ', '-', $highlightFour->mainMenu->name))
+            );
+
+            $categoryName = $highlightFour->mainMenu->name ?? '';
+
+         }
+         else {
+
+            // Main Category
+            $categoryRoute = route(
+               'category.list',
+               strtolower(str_replace(' ', '-', $highlightFour->mainMenu->name))
+            );
+
+            $categoryName = $highlightFour->mainMenu->name ?? '';
+         }
       }
+
    @endphp
 
    @if($highlightFour)
+
       <div class="image-hover-wrapper woodDiv">
-            <a href="{{ route('product.details', $highlightFour->slug) }}">
-               <img src="{{ $baseImagePath . $highlightFour->main_image }}" class="img-resize-1" alt="{{ $highlightFour->name_en }}" style="height:310px">
+
+         <a href="{{ route('product.details', $highlightFour->slug) }}">
+            <img
+               src="{{ $baseImagePath . $highlightFour->main_image }}"
+               class="img-resize-1"
+               alt="{{ $highlightFour->name_en }}"
+               style="height:310px">
+         </a>
+
+         <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
+
+            <a href="{{ $categoryRoute }}">
+               {{ $categoryName }}
             </a>
-            <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
-               <a href="{{ $categoryRoute }}">
-                  {{ $categoryName }}
-               </a>
-               
+
             <p class="custom-link">
-                  @if($highlightFour->link_status === 'Add to Cart')
-                     <a href="#" class="addToCart"
-                        data-id="{{ $highlightFour->id }}"
-                        data-name="{{ $highlightFour->name_en }}"
-                        data-price="{{ $highlightFour->price }}"
-                        data-img="{{ $baseImagePath . $highlightFour->main_image }}"
-                        data-product-barcode="{{ $highlightFour->product_barcode }}">
-                        Add to Cart
-                     </a>
-                  @else
-                        <a href="{{ route('product.details', $highlightFour->slug) }}">Shop More</a>
-                  @endif
-               </p>
-            </div>
+
+               @if($highlightFour->link_status === 'Add to Cart')
+
+                  <a href="#"
+                     class="addToCart"
+                     data-id="{{ $highlightFour->id }}"
+                     data-name="{{ $highlightFour->name_en }}"
+                     data-price="{{ $highlightFour->price }}"
+                     data-img="{{ $baseImagePath . $highlightFour->main_image }}"
+                     data-product-barcode="{{ $highlightFour->product_barcode }}">
+                     Add to Cart
+                  </a>
+
+               @else
+
+                  <a href="{{ route('product.details', $highlightFour->slug) }}">
+                     Shop More
+                  </a>
+
+               @endif
+
+            </p>
+
+         </div>
+
       </div>
+
    @endif
+
 </div>
 <!-- =====end desktop section end ===== -->
 
@@ -278,172 +395,289 @@
 
 <!-- ===== section start for mobile===== -->
 <div class="container topGap-2 mobile-only-section">
+
    @php
       $order = ['highlight-one', 'highlight-two', 'highlight-three'];
    @endphp
 
    @if(isset($highlightProducts) && $highlightProducts->count())
-   
+
       <div class="row">
-            @foreach($order as $key)
-               @php 
-                  $product = $highlightProducts[$key] ?? null;
 
-                  if ($product) {
+         @foreach($order as $key)
 
-                        // Detect correct category route
-                        if ($product->childMenu) {
-                           $categoryRoute = route('childcategory.list', $product->childMenu->id);
-                           $categoryName  = $product->childMenu->name;
-                        }
-                        elseif ($product->subMenu) {
-                           $categoryRoute = route('subcategory.list', $product->subMenu->id);
-                           $categoryName  = $product->subMenu->name;
-                        }
-                        else {
-                           $categoryRoute = route('category.list', strtolower(str_replace(' ', '-', $product->mainMenu->name)));
-                           $categoryName  = $product->mainMenu->name;
-                        }
+            @php
+
+               $product = $highlightProducts[$key] ?? null;
+
+               if ($product) {
+
+                  /*
+                  |--------------------------------------------------------------------------
+                  | Show Parent Category Name
+                  |--------------------------------------------------------------------------
+                  | Child থাকলে → Sub Category show
+                  | Sub থাকলে   → Main Category show
+                  | Main only   → Main Category show
+                  |--------------------------------------------------------------------------
+                  | Link structure আগের মতোই থাকবে
+                  */
+
+                  if ($product->childMenu) {
+
+                     // LINK = Child Category
+                     $categoryRoute = route('childcategory.list', $product->childMenu->id);
+
+                     // SHOW = Sub Category
+                     $categoryName  = $product->subMenu->name ?? '';
 
                   }
-               @endphp
-               
-               @if($product)
-                  {{-- ===== Left Side: highlight-one ===== --}}
-                  @if($loop->first)
-                        <div class="col-lg-6 col-md-12 col-sm-12 topLink mb-2 padding-r">
-                           <div class="image-hover-wrapper">
+                  elseif ($product->subMenu) {
 
-                              {{-- IMAGE CLICK => CATEGORY --}}
-                              <a href="{{ $categoryRoute }}">
-                                    <img src="{{ $baseImagePath . $product->main_image }}" class="img-resize-2 img-fluid" alt="{{ $product->name_en }}">
-                              </a>
+                     // LINK = Sub Category
+                     $categoryRoute = route('subcategory.list', $product->subMenu->id);
 
-                              <div class="image-hover-content-topLink mobile-span">
+                     // SHOW = Main Category
+                     $categoryName  = $product->mainMenu->name ?? '';
 
-                                    {{-- CATEGORY NAME --}}
-                                    <a href="{{ $categoryRoute }}">
-                                       {{ $categoryName }}
-                                    </a>
+                  }
+                  else {
 
-                                    <p class="custom-link">
-                                          @if($product->link_status === 'Add to Cart')
-                                             <a href="#" class="addToCart"
-                                                data-id="{{ $product->id }}"
-                                                data-name="{{ $product->name_en }}"
-                                                data-price="{{ $product->price }}"
-                                                data-img="{{ $baseImagePath . $product->main_image }}"
-                                                data-product-barcode="{{ $product->product_barcode }}">
-                                                Add to Cart
-                                             </a>
-                                          @else
-                                             <a href="{{ route('product.details', $product->slug) }}">Select Options</a>
-                                          @endif
-                                    </p>
-                              </div>
-                           </div>
-                        </div>
-                  @else
-                        {{-- ===== Right Side: highlight-two & highlight-three ===== --}}
-                        @if($loop->iteration == 2)
-                           <div class="col-lg-6 col-md-12 col-sm-12 r-top-1 padding-l">
-                        @endif
+                     // LINK = Main Category
+                     $categoryRoute = route(
+                        'category.list',
+                        strtolower(str_replace(' ', '-', $product->mainMenu->name))
+                     );
 
-                        <div class="image-hover-wrapper mb-2" @if($loop->last) style="margin-top: -16px;" @endif>
+                     // SHOW = Main Category
+                     $categoryName  = $product->mainMenu->name ?? '';
+                  }
+               }
 
-                           {{-- IMAGE CLICK => CATEGORY --}}
+            @endphp
+
+            @if($product)
+
+               {{-- ===== Left Side: highlight-one ===== --}}
+               @if($loop->first)
+
+                  <div class="col-lg-6 col-md-12 col-sm-12 topLink mb-2 padding-r">
+
+                     <div class="image-hover-wrapper">
+
+                        {{-- IMAGE CLICK => CATEGORY --}}
+                        <a href="{{ $categoryRoute }}">
+                           <img
+                              src="{{ $baseImagePath . $product->main_image }}"
+                              class="img-resize-2 img-fluid"
+                              alt="{{ $product->name_en }}">
+                        </a>
+
+                        <div class="image-hover-content-topLink mobile-span">
+
+                           {{-- CATEGORY NAME --}}
                            <a href="{{ $categoryRoute }}">
-                              <img src="{{ $baseImagePath . $product->main_image }}" class="img-resize-1 img-fluid" alt="{{ $product->name_en }}">
+                              {{ $categoryName }}
                            </a>
 
-                           <div class="image-hover-content-cottonSareeLink">
+                           <p class="custom-link">
 
-                              {{-- CATEGORY NAME --}}
-                              <a href="{{ $categoryRoute }}">
-                                    {{ $categoryName }}
-                              </a>
+                              @if($product->link_status === 'Add to Cart')
 
-                              <p class="custom-link">
-                                 @if($product->link_status === 'Add to Cart')
-                                    <a href="#" class="addToCart"
-                                       data-id="{{ $product->id }}"
-                                       data-name="{{ $product->name_en }}"
-                                       data-price="{{ $product->price }}"
-                                       data-img="{{ $baseImagePath . $product->main_image }}"
-                                       data-product-barcode="{{ $product->product_barcode }}">
-                                       Add to Cart
-                                    </a>
-                                 @else
-                                    <a href="{{ route('product.details', $product->slug) }}">Select Options</a>
-                                 @endif
-                              </p>
+                                 <a href="#"
+                                    class="addToCart"
+                                    data-id="{{ $product->id }}"
+                                    data-name="{{ $product->name_en }}"
+                                    data-price="{{ $product->price }}"
+                                    data-img="{{ $baseImagePath . $product->main_image }}"
+                                    data-product-barcode="{{ $product->product_barcode }}">
+                                    Add to Cart
+                                 </a>
 
-                           </div>
+                              @else
+
+                                 <a href="{{ route('product.details', $product->slug) }}">
+                                    Select Options
+                                 </a>
+
+                              @endif
+
+                           </p>
+
                         </div>
 
-                        @if($loop->last)
-                           </div>
-                        @endif
+                     </div>
+
+                  </div>
+
+               @else
+
+                  {{-- ===== Right Side: highlight-two & highlight-three ===== --}}
+                  @if($loop->iteration == 2)
+                     <div class="col-lg-6 col-md-12 col-sm-12 r-top-1 padding-l">
                   @endif
+
+                  <div class="image-hover-wrapper mb-2"
+                     @if($loop->last)
+                        style="margin-top: -16px;"
+                     @endif>
+
+                     {{-- IMAGE CLICK => CATEGORY --}}
+                     <a href="{{ $categoryRoute }}">
+                        <img
+                           src="{{ $baseImagePath . $product->main_image }}"
+                           class="img-resize-1 img-fluid"
+                           alt="{{ $product->name_en }}">
+                     </a>
+
+                     <div class="image-hover-content-cottonSareeLink">
+
+                        {{-- CATEGORY NAME --}}
+                        <a href="{{ $categoryRoute }}">
+                           {{ $categoryName }}
+                        </a>
+
+                        <p class="custom-link">
+
+                           @if($product->link_status === 'Add to Cart')
+
+                              <a href="#"
+                                 class="addToCart"
+                                 data-id="{{ $product->id }}"
+                                 data-name="{{ $product->name_en }}"
+                                 data-price="{{ $product->price }}"
+                                 data-img="{{ $baseImagePath . $product->main_image }}"
+                                 data-product-barcode="{{ $product->product_barcode }}">
+                                 Add to Cart
+                              </a>
+
+                           @else
+
+                              <a href="{{ route('product.details', $product->slug) }}">
+                                 Select Options
+                              </a>
+
+                           @endif
+
+                        </p>
+
+                     </div>
+
+                  </div>
+
+                  @if($loop->last)
+                     </div>
+                  @endif
+
                @endif
-            @endforeach
+
+            @endif
+
+         @endforeach
+
       </div>
+
    @endif
+
 
    {{-- ===== Highlight Four ===== --}}
    @php
+
       $highlightFour = $highlightProducts['highlight-four'] ?? null;
 
       if ($highlightFour) {
-            if ($highlightFour->childMenu) {
-               $categoryRoute = route('childcategory.list', $highlightFour->childMenu->id);
-               $categoryName  = $highlightFour->childMenu->name;
-            }
-            elseif ($highlightFour->subMenu) {
-               $categoryRoute = route('subcategory.list', $highlightFour->subMenu->id);
-               $categoryName  = $highlightFour->subMenu->name;
-            }
-            else {
-               $categoryRoute = route('category.list', strtolower(str_replace(' ', '-', $highlightFour->mainMenu->name)));
-               $categoryName  = $highlightFour->mainMenu->name;
-            }
+
+         /*
+         |--------------------------------------------------------------------------
+         | Parent Category Show Logic
+         |--------------------------------------------------------------------------
+         */
+
+         if ($highlightFour->childMenu) {
+
+            // LINK = Child Category
+            $categoryRoute = route('childcategory.list', $highlightFour->childMenu->id);
+
+            // SHOW = Sub Category
+            $categoryName  = $highlightFour->subMenu->name ?? '';
+
+         }
+         elseif ($highlightFour->subMenu) {
+
+            // LINK = Sub Category
+            $categoryRoute = route('subcategory.list', $highlightFour->subMenu->id);
+
+            // SHOW = Main Category
+            $categoryName  = $highlightFour->mainMenu->name ?? '';
+
+         }
+         else {
+
+            // LINK = Main Category
+            $categoryRoute = route(
+               'category.list',
+               strtolower(str_replace(' ', '-', $highlightFour->mainMenu->name))
+            );
+
+            // SHOW = Main Category
+            $categoryName  = $highlightFour->mainMenu->name ?? '';
+         }
       }
+
    @endphp
 
    @if($highlightFour)
+
       <div class="image-hover-wrapper woodDiv">
 
-            {{-- IMAGE CLICK => CATEGORY --}}
+         {{-- IMAGE CLICK => CATEGORY --}}
+         <a href="{{ $categoryRoute }}">
+            <img
+               src="{{ $baseImagePath . $highlightFour->main_image }}"
+               class="img-resize-1"
+               alt="{{ $highlightFour->name_en }}"
+               style="height:310px">
+         </a>
+
+         <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
+
+            {{-- CATEGORY NAME --}}
             <a href="{{ $categoryRoute }}">
-               <img src="{{ $baseImagePath . $highlightFour->main_image }}" class="img-resize-1" alt="{{ $highlightFour->name_en }}" style="height:310px">
+               {{ $categoryName }}
             </a>
 
-            <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
-
-               {{-- CATEGORY NAME --}}
-               <a href="{{ $categoryRoute }}">
-                  {{ $categoryName }}
-               </a>
-               
             <p class="custom-link">
-                  @if($highlightFour->link_status === 'Add to Cart')
-                     <a href="#" class="addToCart"
-                        data-id="{{ $highlightFour->id }}"
-                        data-name="{{ $highlightFour->name_en }}"
-                        data-price="{{ $highlightFour->price }}"
-                        data-img="{{ $baseImagePath . $highlightFour->main_image }}"
-                        data-product-barcode="{{ $highlightFour->product_barcode }}">
-                        Add to Cart
-                     </a>
-                  @else
-                        <a href="{{ route('product.details', $highlightFour->slug) }}">Shop More</a>
-                  @endif
-               </p>
-            </div>
+
+               @if($highlightFour->link_status === 'Add to Cart')
+
+                  <a href="#"
+                     class="addToCart"
+                     data-id="{{ $highlightFour->id }}"
+                     data-name="{{ $highlightFour->name_en }}"
+                     data-price="{{ $highlightFour->price }}"
+                     data-img="{{ $baseImagePath . $highlightFour->main_image }}"
+                     data-product-barcode="{{ $highlightFour->product_barcode }}">
+                     Add to Cart
+                  </a>
+
+               @else
+
+                  <a href="{{ route('product.details', $highlightFour->slug) }}">
+                     Shop More
+                  </a>
+
+               @endif
+
+            </p>
+
+         </div>
+
       </div>
+
    @endif
+
 </div>
-<!-- ===== section end moble===== -->
+<!-- ===== section end mobile===== -->
 
 
 

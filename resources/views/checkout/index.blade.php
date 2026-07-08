@@ -125,7 +125,7 @@
                                 <div class="invalid-feedback" id="errorCity" style="display: none; color: #dc3545; font-size: 0.875rem;"></div>
                             </div>
                             <div class="form-group col-md-4">
-                                <label>District *</label>
+                                <label>District / Area *</label>
                                 <select class="form-control billing-field" id="billingDistrict" required>
                                     <option value="">Select your district...</option>
                                     <option value="Bagerhat">Bagerhat</option>
@@ -141,7 +141,9 @@
                                     <option value="Chuadanga">Chuadanga</option>
                                     <option value="Comilla">Comilla</option>
                                     <option value="Cox's Bazar">Cox's Bazar</option>
-                                    <option value="Dhaka" selected>Dhaka</option>
+                                    <option value="Narayanganj">Narayanganj</option>
+                                    <option value="Savar">Savar</option>
+                                    <option value="Dhaka">Dhaka City</option>
                                     <option value="Dinajpur">Dinajpur</option>
                                     <option value="Faridpur">Faridpur</option>
                                     <option value="Feni">Feni</option>
@@ -170,7 +172,6 @@
                                     <option value="Mymensingh">Mymensingh</option>
                                     <option value="Naogaon">Naogaon</option>
                                     <option value="Narail">Narail</option>
-                                    <option value="Narayanganj">Narayanganj</option>
                                     <option value="Narsingdi">Narsingdi</option>
                                     <option value="Natore">Natore</option>
                                     <option value="Netrokona">Netrokona</option>
@@ -350,6 +351,7 @@
 
                 <!-- Order Review Tab -->
                 <div class="tab-pane fade" id="review" role="tabpanel">
+                    <div id="stockAlert"></div>
                     <div id="orderSummary"></div>
                     <div class="text-right mt-3">
                     <button class="btn btn-secondary" type="button" onclick="nextTab('shipping-tab')">Back</button>
@@ -555,6 +557,79 @@
         }
     }
 
+    let cartStockOk = true;
+
+    function fetchStockQty(barcode) {
+        if (!barcode || barcode === 'NO_BARCODE') {
+            return Promise.resolve(0);
+        }
+
+        return fetch("{{ url('/stock') }}/" + barcode)
+            .then(res => res.json())
+            .then(res => {
+                const data = res?.data ?? {};
+                const inCatalog = res?.success && data.in_catalog === true;
+                return inCatalog ? (Number(data.store_stock) || 0) : 0;
+            })
+            .catch(() => 0);
+    }
+
+    function renderStockAlert(outOfStock) {
+        const alertEl = document.getElementById('stockAlert');
+        if (!alertEl) {
+            return;
+        }
+
+        if (!outOfStock.length) {
+            alertEl.innerHTML = '';
+            cartStockOk = true;
+            return;
+        }
+
+        cartStockOk = false;
+        const list = outOfStock.map(item =>
+            `<li><strong>${item.name}</strong> — requested ${item.needed}, available ${item.available}</li>`
+        ).join('');
+
+        alertEl.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                Some items in your cart are no longer available:
+                <ul class="mb-0 mt-2">${list}</ul>
+                Please remove them or update quantity before continuing.
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>`;
+    }
+
+    async function checkCartStock() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        if (!cart.length) {
+            renderStockAlert([]);
+            return true;
+        }
+
+        const checks = await Promise.all(cart.map(async item => {
+            const available = await fetchStockQty(item.barcode);
+            const needed = Number(item.qty) || 1;
+
+            if (available < needed) {
+                return {
+                    name: item.name,
+                    needed,
+                    available
+                };
+            }
+
+            return null;
+        }));
+
+        const outOfStock = checks.filter(Boolean);
+        renderStockAlert(outOfStock);
+        return outOfStock.length === 0;
+    }
+
     function validateReview() {
         const cart = JSON.parse(localStorage.getItem("cart")) || [];
         if (cart.length === 0) {
@@ -565,10 +640,13 @@
             }
             return false;
         }
+        if (!cartStockOk) {
+            return false;
+        }
         return true;
     }
 
-    function validateAndNext(currentStep, nextTabId) {
+    async function validateAndNext(currentStep, nextTabId) {
         let isValid = false;
 
         switch(currentStep) {
@@ -587,7 +665,11 @@
                 }
                 break;
             case 'review':
-                isValid = validateReview();
+                if (!validateReview()) {
+                    isValid = false;
+                    break;
+                }
+                isValid = await checkCartStock();
                 if (isValid) {
                     completedSteps.review = true;
                     enableTab('payment-tab');
@@ -759,6 +841,7 @@
                 cart = cart.filter(item => item.id != id);
                 localStorage.setItem("cart", JSON.stringify(cart));
                 loadOrderSummary();
+                checkCartStock();
                 if(typeof renderCart === "function") renderCart();
                 if(typeof updateCartCounts === "function") updateCartCounts();
             });
@@ -775,6 +858,7 @@
         $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
             if(e.target.id === 'review-tab') {
                 loadOrderSummary();
+                checkCartStock();
             }
             if(e.target.id === 'payment-tab') {
                 updatePaymentMethods();
@@ -829,10 +913,29 @@
                 }
             }
         });
+
+        @if(session('stock_error'))
+        renderStockAlert(@json(session('stock_error')));
+        enableTab('shipping-tab');
+        enableTab('review-tab');
+        nextTab('review-tab');
+        loadOrderSummary();
+        @endif
+
+        @if(session('error'))
+        $('#checkoutTabContent').prepend(`
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        `);
+        @endif
     });
 
 //--------place order-----
- $(document).on("click", ".btn-success", function() {
+ $(document).on("click", ".btn-success", async function() {
     const cart = localStorage.getItem("cart");
     if (!cart || JSON.parse(cart).length === 0) {
         // Show error in payment section
@@ -840,6 +943,13 @@
         setTimeout(function() {
             $('.alert').fadeOut();
         }, 5000);
+        return;
+    }
+
+    const stockOk = await checkCartStock();
+    if (!stockOk) {
+        enableTab('review-tab');
+        nextTab('review-tab');
         return;
     }
 

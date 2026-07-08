@@ -21,7 +21,8 @@
     | Get All Products Collection
     |--------------------------------------------------------------------------
     */
-    $allProducts = $products->getCollection();
+    //$allProducts = $products->getCollection();
+    $allProducts = $products;
 
 
     /*
@@ -116,7 +117,7 @@
     */
     $currentPage = request()->get('page', 1);
 
-    $perPage = 50;
+    $perPage = 40;
 
     $pagedProducts = new \Illuminate\Pagination\LengthAwarePaginator(
 

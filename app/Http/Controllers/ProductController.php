@@ -18,14 +18,24 @@ class ProductController extends Controller{
 
    
     
-    public function list($name){
-        $decodedName = str_replace('-', ' ', $name);
-        $mainMenu = MainMenu::where('name', $decodedName)->firstOrFail();
-        $products = Product::where('main_menu_id', $mainMenu->id)
-            
+    // public function list($name){
+    //     $decodedName = str_replace('-', ' ', $name);
+    //     $mainMenu = MainMenu::where('name', $decodedName)->firstOrFail();
+    //     $products = Product::where('main_menu_id', $mainMenu->id)
+    //         ->where('published_site', 'Y')
+    //         ->orderBy('id', 'desc')
+    //         ->paginate(500);
+    //         $banner = CategoryBanner::where('main_menu_id', $mainMenu->id)->first();
+    //         return view('product-categories.index', compact('products', 'mainMenu', 'banner'));
+    //     }
+    
+         public function list($name){
+            $decodedName = str_replace('-', ' ', $name);
+            $mainMenu = MainMenu::where('name', $decodedName)->firstOrFail();
+            $products = Product::where('main_menu_id', $mainMenu->id)
             ->where('published_site', 'Y')
             ->orderBy('id', 'desc')
-            ->paginate(50);
+            ->get();
             $banner = CategoryBanner::where('main_menu_id', $mainMenu->id)->first();
             return view('product-categories.index', compact('products', 'mainMenu', 'banner'));
         }

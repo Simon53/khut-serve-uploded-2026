@@ -112,6 +112,8 @@ class CategoryController extends Controller
             })
             ->orderBy('id', 'desc')
             ->paginate(50);
+        
+      
     
         $category->banner = $bannerPath;
     

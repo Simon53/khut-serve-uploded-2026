@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\KhutCatalogService;
 use App\Services\KhutSaleSyncService;
+use App\Services\OrderEmailService;
 
 class OrderController extends Controller
 {
@@ -13,7 +14,12 @@ class OrderController extends Controller
     $cart = json_decode($request->cart, true);
 
     if(!$cart || count($cart) === 0){
-        return response()->json(['success'=>false, 'message'=>'Cart is empty!']);
+        return redirect()->route('checkout.index')->with('error', 'Cart is empty!');
+    }
+
+    $stockIssues = app(KhutCatalogService::class)->validateCartStock($cart);
+    if (!empty($stockIssues)) {
+        return redirect()->route('checkout.index')->with('stock_error', $stockIssues);
     }
 
     $subtotal = 0;
@@ -64,6 +70,15 @@ class OrderController extends Controller
         ]);
     }
 
+    $order->load('items');
+    $stockIssues = app(KhutCatalogService::class)->validateOrderStock($order);
+    if (!empty($stockIssues)) {
+        $order->items()->delete();
+        $order->delete();
+
+        return redirect()->route('checkout.index')->with('stock_error', $stockIssues);
+    }
+
     app(KhutCatalogService::class)->decrementForOrder($order);
 
     try {
@@ -74,6 +89,8 @@ class OrderController extends Controller
             'message' => $e->getMessage(),
         ]);
     }
+
+    app(OrderEmailService::class)->sendOrderConfirmation($order);
 
     $request->session()->put('order', $order);
 

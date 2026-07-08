@@ -16,6 +16,17 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SslCommerzPaymentController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\WishlistController;
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/test-mail', function () {
+
+    Mail::raw('Mail system working fine', function ($message) {
+        $message->to('mrsimon000@gmail.com')
+                ->subject('Test Mail');
+    });
+
+    return 'Mail Sent';
+});
 
 //use for server imgage-view
 use Illuminate\Support\Facades\Response;

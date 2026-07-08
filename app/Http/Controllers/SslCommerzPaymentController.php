@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Services\KhutCatalogService;
 use App\Services\KhutSaleSyncService;
+use App\Services\OrderEmailService;
 
 class SslCommerzPaymentController extends Controller
 {
@@ -98,6 +99,11 @@ class SslCommerzPaymentController extends Controller
         
         if(!$cart || count($cart) === 0){
             return back()->with('error', 'Cart is empty!');
+        }
+
+        $stockIssues = app(KhutCatalogService::class)->validateCartStock($cart);
+        if (!empty($stockIssues)) {
+            return redirect()->route('checkout.index')->with('stock_error', $stockIssues);
         }
 
         // Calculate subtotal
@@ -447,7 +453,16 @@ class SslCommerzPaymentController extends Controller
                 }
 
                 // Decrement local KHUT catalog stock for paid card orders
-                app(KhutCatalogService::class)->decrementForOrder($order);
+                $order->load('items');
+                $stockIssues = app(KhutCatalogService::class)->validateOrderStock($order);
+                if (empty($stockIssues)) {
+                    app(KhutCatalogService::class)->decrementForOrder($order);
+                } else {
+                    \Log::warning('Card order stock insufficient at payment success', [
+                        'order_id' => $order->id,
+                        'issues' => $stockIssues,
+                    ]);
+                }
 
                 // Push paid card order to external KHUT sales API
                 try {
@@ -458,6 +473,8 @@ class SslCommerzPaymentController extends Controller
                         'message' => $e->getMessage(),
                     ]);
                 }
+
+                app(OrderEmailService::class)->sendOrderConfirmation($order);
 
                 return view('payment.success', ['order' => $order]);
             } else {

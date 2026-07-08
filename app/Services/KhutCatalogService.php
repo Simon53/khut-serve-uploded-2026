@@ -110,7 +110,8 @@ class KhutCatalogService
             return;
         }
 
-        $catalog[$barcode]['stock'] = max(0, (int)$catalog[$barcode]['stock'] - $qty);
+        $available = (int) $catalog[$barcode]['stock'];
+        $catalog[$barcode]['stock'] = max(0, $available - min($qty, $available));
         Cache::put(self::CACHE_KEY, $catalog, self::TTL);
     }
 
@@ -128,6 +129,76 @@ class KhutCatalogService
         }
 
         return $result;
+    }
+
+    /**
+     * Validate cart line items against catalog stock.
+     * Returns issue rows when stock is missing or insufficient.
+     */
+    public function validateCartStock(array $cart): array
+    {
+        $needed = [];
+        $names = [];
+
+        foreach ($cart as $item) {
+            $barcode = trim((string) ($item['barcode'] ?? ''));
+            $qty = max(1, (int) ($item['qty'] ?? 1));
+            $name = (string) ($item['name'] ?? 'Product');
+
+            if ($barcode === '' || $barcode === 'NO_BARCODE') {
+                $needed['__missing__'] = ($needed['__missing__'] ?? 0) + $qty;
+                $names['__missing__'] = $name;
+                continue;
+            }
+
+            $needed[$barcode] = ($needed[$barcode] ?? 0) + $qty;
+            $names[$barcode] = $name;
+        }
+
+        $issues = [];
+
+        foreach ($needed as $barcode => $qty) {
+            if ($barcode === '__missing__') {
+                $issues[] = [
+                    'name' => $names[$barcode],
+                    'barcode' => '',
+                    'needed' => $qty,
+                    'available' => 0,
+                ];
+                continue;
+            }
+
+            $available = $this->hasBarcode($barcode) ? $this->getStock($barcode) : 0;
+
+            if (!$this->hasBarcode($barcode) || $available < $qty) {
+                $issues[] = [
+                    'name' => $names[$barcode],
+                    'barcode' => $barcode,
+                    'needed' => $qty,
+                    'available' => $available,
+                ];
+            }
+        }
+
+        return $issues;
+    }
+
+    public function validateOrderStock(Order $order): array
+    {
+        $items = $order->relationLoaded('items')
+            ? $order->items
+            : $order->items()->get();
+
+        $cart = [];
+        foreach ($items as $item) {
+            $cart[] = [
+                'name' => $item->product_name,
+                'barcode' => $item->barcode,
+                'qty' => $item->quantity,
+            ];
+        }
+
+        return $this->validateCartStock($cart);
     }
 
     public function decrementForOrder(Order $order): void
