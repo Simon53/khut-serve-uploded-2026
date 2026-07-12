@@ -42,7 +42,8 @@ public function productIndex(){
          $status = Status::all();
          $iron = Iron::all();
          $dryWash = DryWash::all(); 
-         $galleries = GalleryTable::all();
+         //$galleries = GalleryTable::all();
+         $galleries = collect();
          return view('product.add-new-product', compact('mainMenus', 'commonSizes', 'bodSyizes', 'color', 'status', 'iron', 'dryWash', 'galleries'));
     }
 
@@ -388,7 +389,8 @@ public function productIndex(){
     public function edit($id){
         $product = Product::with(['commonSizes', 'bodySizes', 'colors', 'statuses', 'irons', 'dryWashes', 'thumbnails', 'thumbnails.color', 'thumbnails.bodySize', 'thumbnails.commonSize'])->findOrFail($id); 
         $thumbnails = $product->thumbnails;
-        $galleries = GalleryTable::all(); 
+        //$galleries = GalleryTable::all(); 
+        $galleries = collect();
         $mainMenus = MainMenu::all();
         $subMenus = SubMenu::all();
         $childMenus = ChildMenu::all();

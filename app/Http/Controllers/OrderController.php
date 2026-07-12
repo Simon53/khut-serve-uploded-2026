@@ -42,6 +42,7 @@ class OrderController extends Controller
         'last_name'  => $request->last_name,
         'email'      => $request->email,
         'phone'      => $request->phone,
+        'alternative_phone' => $request->alternative_phone ?? null,
         'address'    => $request->address,
         'apartment'  => $request->apartment ?? null,
         'district'   => $request->district,

@@ -36,9 +36,24 @@
                         @foreach($sliders as $index => $slider)
                         <tr data-id="{{ $slider->id }}">
                            <td>{{ $index + 1 }}</td>
-                           <td>
+                           <!-- <td>
                               <img src="{{ asset('storage/'.$slider->slider_location) }}" style="width:100px; height:auto">
-                           </td>
+                           </td> -->
+                           <td>
+                                @php
+                                    $file = asset('storage/'.$slider->slider_location);
+                                    $ext = strtolower(pathinfo($slider->slider_location, PATHINFO_EXTENSION));
+                                @endphp
+
+                                @if(in_array($ext, ['mp4','mov','avi','wmv','webm','mkv']))
+                                    <video width="120" height="70" controls>
+                                        <source src="{{ $file }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                @else
+                                    <img src="{{ $file }}" style="width:100px;height:auto;">
+                                @endif
+                            </td>
                            <td>
                               <span class="badge {{ $slider->is_active=='Yes' ? 'badge-success' : 'badge-danger' }}">
                                  {{ $slider->is_active }}
@@ -74,6 +89,15 @@
                <div class="form-group">
                   <label>Slider Image</label>
                   <input type="file" name="slider_image" id="sliderImage" class="form-control" accept="image/*,video/*" >
+                  <div class="progress mt-3" id="uploadProgress" style="display:none;height:22px;">
+                    <div
+                            id="uploadProgressBar"
+                            class="progress-bar progress-bar-striped progress-bar-animated"
+                            role="progressbar"
+                            style="width:0%">
+                            0%
+                    </div>
+                </div>
                   <br/><br/>
                   or<br/><br/>
                   <input type="text" name="video_url" class="form-control" placeholder="YouTube / Facebook Embed URL">
@@ -92,7 +116,7 @@
    </div>
 </div>
 
-<!-- Edit Slider Modal -->
+
 <!-- Edit Slider Modal -->
 <div class="modal fade" id="editSliderModal" tabindex="-1">
   <div class="modal-dialog">
@@ -130,127 +154,151 @@
     const token = $('meta[name="csrf-token"]').attr('content');
 
     // Add slider
-    $('#addSliderForm').submit(function(e){
+//     $('#addSliderForm').submit(function(e){
+//     e.preventDefault();
+//     let formData = new FormData(this);
+//     $.ajax({
+//         url: "{{ url('/slider/store') }}",
+//         type: 'POST',
+//         data: formData,
+//         headers: {
+//             'X-CSRF-TOKEN': token
+//         },
+//         contentType: false,
+//         processData: false,
+//         success: function(res){
+//             if(res.status == 'success'){
+//                 toastr.success(res.message);
+//                 $('#addSliderModal').modal('hide');
+//                 let media = '';
+//                 // embed video
+//                 if(res.slider.video_url){
+//                     media = `
+//                         <iframe
+//                             src="${res.slider.video_url}"
+//                             width="120"
+//                             height="80"
+//                             frameborder="0"
+//                             allowfullscreen>
+//                         </iframe>
+//                     `;
+//                 }
 
+//                 // uploaded video
+//                 else if(
+//                     res.slider.url &&
+//                     (
+//                         res.slider.url.endsWith('.mp4') ||
+//                         res.slider.url.endsWith('.webm') ||
+//                         res.slider.url.endsWith('.mov') ||
+//                         res.slider.url.endsWith('.avi')
+//                     )
+//                 ){
+//                     media = `
+//                         <video width="120" controls>
+//                             <source src="${res.slider.url}">
+//                         </video>
+//                     `;
+//                 }
+//                 // image
+//                 else {
+
+//                     media = `
+//                         <img src="${res.slider.url}" style="width:100px">
+//                     `;
+//                 }
+//                 let row = `
+//                     <tr data-id="${res.slider.id}">
+//                         <td>#</td>
+//                         <td>${media}</td>
+//                         <td>
+//                             <span class="badge ${res.slider.is_active=='Yes' ? 'badge-success' : 'badge-danger'}">
+//                                 ${res.slider.is_active}
+//                             </span>
+//                         </td>
+//                         <td>
+//                             <button class="btn btn-primary editMenuBtn"
+//                                     data-id="${res.slider.id}">
+//                                 Edit
+//                             </button>
+//                         </td>
+//                         <td>
+//                             <button class="btn btn-danger btn-sm deleteMenuBtn"
+//                                     data-id="${res.slider.id}">
+//                                 Delete
+//                             </button>
+//                         </td>
+//                     </tr>
+//                 `;
+
+//                 $('.sliderRow').prepend(row);
+//             } else {
+//                 toastr.error(res.message);
+//             }
+//         },
+//         error: function(xhr){
+//             console.log(xhr.responseText);
+//             toastr.error('Server Error');
+//         }
+//     });
+// });
+
+
+$('#addSliderForm').submit(function(e){
     e.preventDefault();
-
     let formData = new FormData(this);
+    $("#uploadProgress").show();
+    $("#uploadProgressBar")
+        .css("width","0%")
+        .text("0%");
 
     $.ajax({
+        url:"{{ url('/slider/store') }}",
+        type:"POST",
+        data:formData,
+        headers:{
+            'X-CSRF-TOKEN':token
+        },
+        processData:false,
+        contentType:false,
+        timeout:0,
+        xhr:function(){
+            let xhr = new window.XMLHttpRequest();
+            xhr.upload.addEventListener("progress", function(e){
+                if(e.lengthComputable){
+                    let percent = Math.round((e.loaded/e.total)*100);
+                    $("#uploadProgressBar")
+                        .css("width",percent+"%")
+                        .text(percent+"%");
+                }
 
-        url: "{{ url('/slider/store') }}",
-
-        type: 'POST',
-
-        data: formData,
-
-        headers: {
-            'X-CSRF-TOKEN': token
+            }, false);
+            return xhr;
         },
 
-        contentType: false,
-
-        processData: false,
-
-        success: function(res){
-
-            if(res.status == 'success'){
-
+        success:function(res){
+            $("#uploadProgressBar")
+                .css("width","100%")
+                .text("100%");
+            setTimeout(function(){
+                $("#uploadProgress").hide();
+            },800);
+            if(res.status=="success"){
                 toastr.success(res.message);
-
                 $('#addSliderModal').modal('hide');
+                location.reload();
 
-                let media = '';
-
-                // embed video
-                if(res.slider.video_url){
-
-                    media = `
-                        <iframe
-                            src="${res.slider.video_url}"
-                            width="120"
-                            height="80"
-                            frameborder="0"
-                            allowfullscreen>
-                        </iframe>
-                    `;
-
-                }
-
-                // uploaded video
-                else if(
-                    res.slider.url &&
-                    (
-                        res.slider.url.endsWith('.mp4') ||
-                        res.slider.url.endsWith('.webm') ||
-                        res.slider.url.endsWith('.mov') ||
-                        res.slider.url.endsWith('.avi')
-                    )
-                ){
-
-                    media = `
-                        <video width="120" controls>
-                            <source src="${res.slider.url}">
-                        </video>
-                    `;
-
-                }
-
-                // image
-                else {
-
-                    media = `
-                        <img src="${res.slider.url}" style="width:100px">
-                    `;
-                }
-
-                let row = `
-                    <tr data-id="${res.slider.id}">
-
-                        <td>#</td>
-
-                        <td>${media}</td>
-
-                        <td>
-                            <span class="badge ${res.slider.is_active=='Yes' ? 'badge-success' : 'badge-danger'}">
-                                ${res.slider.is_active}
-                            </span>
-                        </td>
-
-                        <td>
-                            <button class="btn btn-primary editMenuBtn"
-                                    data-id="${res.slider.id}">
-                                Edit
-                            </button>
-                        </td>
-
-                        <td>
-                            <button class="btn btn-danger btn-sm deleteMenuBtn"
-                                    data-id="${res.slider.id}">
-                                Delete
-                            </button>
-                        </td>
-
-                    </tr>
-                `;
-
-                $('.sliderRow').prepend(row);
-
-            } else {
-
+            }else{
                 toastr.error(res.message);
             }
         },
-
-        error: function(xhr){
-
+        error:function(xhr){
+            $("#uploadProgress").hide();
             console.log(xhr.responseText);
+            toastr.error("Upload Failed");
 
-            toastr.error('Server Error');
         }
-
     });
-
 });
 
      // show modal with existing data

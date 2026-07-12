@@ -203,12 +203,17 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="form-group col-md-6">
-                                <label>Phone *</label>
+                            <div class="form-group col-md-4">
+                                <label>Contact No *</label>
                                 <input type="text" class="form-control billing-field" id="billingPhone" placeholder="11-digit Number ei. 01xxxxxxxxx" required>
                                 <div class="invalid-feedback" id="errorPhone" style="display: none; color: #dc3545; font-size: 0.875rem;"></div>
                             </div>
-                            <div class="form-group col-md-6">
+                            <div class="form-group col-md-4">
+                                <label>Alternative Contact No </label>
+                                <input type="text" class="form-control billing-field" id="alternativePhone" placeholder="11-digit Number ei. 01xxxxxxxxx" >
+                                <div class="invalid-feedback" id="errorAlternativePhone" style="display: none; color: #dc3545; font-size: 0.875rem;"></div>
+                            </div>
+                            <div class="form-group col-md-4">
                                 <label>Email address *</label>
                                 <input type="email" class="form-control billing-field" id="billingEmail" placeholder="example@email.com" required>
                                 <div class="invalid-feedback" id="errorEmail" style="display: none; color: #dc3545; font-size: 0.875rem;"></div>
@@ -392,6 +397,7 @@
 <script src="{{ asset('/js/popper.js') }}"></script>
 <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
 <script src="{{ asset('/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('/js/swiper-bundle.min.js') }}"></script>
 <script src="{{ asset('/js/custom.js') }}"></script>
 
 <script>
@@ -465,6 +471,7 @@
         const district = $("#billingDistrict").val() || '';
         const city = $("#billingCity").val() || '';
         const postcode = $("#billingPostcode").val() || '';
+        const alternative_phone = $("#alternativePhone").val() || '';
 
         // Validate First Name
         if (!firstName.trim()) {
@@ -533,6 +540,16 @@
         } else {
             if (!/^\d{4}$/.test(postcode.trim())) {
                 showError('Postcode', 'Please enter a valid 4-digit postcode.');
+                isValid = false;
+            }
+        }
+
+     // Validate Alternative Phone (Optional)
+        if (alternative_phone.trim()) {
+            const altPhoneClean = alternative_phone.replace(/\s/g, '');
+
+            if (!/^01\d{9}$/.test(altPhoneClean)) {
+                showError('AlternativePhone', 'Please enter a valid 11-digit alternative phone number starting with 01.');
                 isValid = false;
             }
         }
@@ -698,39 +715,7 @@
         return 150;
     }
 
-    // Update payment method options based on postcode
-    /*function updatePaymentMethods() {
-        const postcode = $("#billingPostcode").length ? $("#billingPostcode").val() : $("#billing input[placeholder='4-digit Number']").val() || '';
-        
-        if (postcode && /^\d{4}$/.test(postcode.trim())) {
-            const isInSpecialRange = isPostcodeInSpecialRange(postcode);
-            const codOption = $("#codPaymentOption");
-            const cardRadio = $("input[name='paymentMethod'][value='card']");
-            const codRadio = $("input[name='paymentMethod'][value='cod']");
-            
-            if (isInSpecialRange) {
-                // Postcode is 1000, 1100, or 1203-1236 - Show COD option
-                codOption.show();
-                // If card is selected, switch to COD as default for these postcodes
-                if (cardRadio.is(':checked')) {
-                    codRadio.prop('checked', true);
-                }
-            } else {
-                // Postcode is outside range - Hide COD, show only Card
-                codOption.hide();
-                // Ensure card is selected if COD was selected
-                if (codRadio.is(':checked')) {
-                    cardRadio.prop('checked', true);
-                }
-            }
-        } else {
-            // Postcode not entered or invalid - Hide COD by default
-            $("#codPaymentOption").hide();
-            if (!$("input[name='paymentMethod']:checked").length) {
-                $("input[name='paymentMethod'][value='card']").prop('checked', true);
-            }
-        }
-    }*/
+   
     
     
     // Update payment method options based on postcode AND district
@@ -890,6 +875,7 @@
             const lastName = $("#billing input[placeholder='Last Name']").val() || '';
             const email = $("#billing input[placeholder='example@email.com']").val() || '';
             const phone = $("#billing input[placeholder*='01']").val() || '';
+			const alternative_phone = $("#billing input[placeholder*='01']").val() || '';
             const address = $("#billing input[placeholder*='Building']").val() || '';
             const country = $("#billingCountry").val() || '';
             //const district = $("#billing select.form-control.billing-field").val() || '';
@@ -960,6 +946,7 @@
         last_name: $("#billing input[placeholder='Last Name']").val(),
         email: $("#billing input[placeholder='example@email.com']").val(),
         phone: $("#billing input[placeholder*='01']").val(),
+		alternative_phone: $("#billing input[placeholder*='01']").val(),
         address: $("#billing input[placeholder*='Building']").val(),
         apartment: $("#billing input[placeholder*='Apartment']").val() || '',
         country: $("#billingCountry").val() || 'Bangladesh',

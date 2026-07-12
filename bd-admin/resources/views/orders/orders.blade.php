@@ -88,7 +88,8 @@
                         <th>Customer</th>
                         <th>Product Name</th>
                         <th>Order Date</th>
-                        <th>Phone</th>
+                        <th>Contact No</th>
+                        <th>Alternative Contact No</th>
                         <th>Side</th>
                         <th>District Name</th>
                         <th>Total</th>
@@ -142,6 +143,7 @@
                         <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') }}</td>
 
                         <td>{{ $order->phone }}</td>
+                        <td>{{ $order->alternative_phone }}</td>
                         
                         <td>
                             @php

@@ -64,7 +64,7 @@ class SliderController extends Controller
  public function store(Request $request){
         try {
             $request->validate([
-                'slider_image' => 'nullable|mimes:jpeg,png,jpg,mp4,mov,avi,wmv,webm,mkv|max:51200',
+                'slider_image' => 'nullable|mimes:jpeg,png,jpg,mp4,mov,avi,wmv,webm,mkv|max:204800',
                 'video_url' => 'nullable|url',
             ]);            
            

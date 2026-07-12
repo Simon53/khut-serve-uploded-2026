@@ -88,6 +88,7 @@ Route::post('/galleryImageDelete', [GalleryController::class, 'deleteGalleryImg'
 Route::post('/upload-gallery-image', [GalleryController::class, 'upload'])->name('upload.gallery.image')->middleware(LoginCheckMiddleware::class);
 Route::get('/get-gallery-images', [GalleryController::class, 'getImages'])->middleware(LoginCheckMiddleware::class);
 
+
 //menu section route (main menu)
 Route::get('/menu', [MainMenuController::class, 'menuIndex'])->middleware(LoginCheckMiddleware::class);
 Route::post('/menu/store', [MainMenuController::class, 'store'])->middleware(LoginCheckMiddleware::class);

@@ -172,7 +172,7 @@ class GalleryController extends Controller{
     // Load gallery 1st view (return full URLs in JSON)
     public function galleryLoadJson()
     {
-        $images = GalleryTable::take(20)->orderBy('id', 'desc')->get();
+        $images = GalleryTable::take(10)->orderBy('id', 'desc')->get();
 
         $images->transform(function ($item) {
             $item->url = url('storage/' . $item->location);
@@ -192,7 +192,7 @@ class GalleryController extends Controller{
         $firstId = $request->id;
         $images = GalleryTable::where('id', '<', $firstId)
                     ->orderBy('id', 'desc')
-                    ->limit(20)
+                    ->limit(10)
                     ->get();
 
         $images->transform(function ($item) {

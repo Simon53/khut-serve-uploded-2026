@@ -652,14 +652,20 @@
                <!-- Gallery Tab -->
                <div class="tab-pane fade" id="galleryImage" role="tabpanel">
                   <div class="row">
-                    @foreach($galleries as $gallery)
+                    <!-- @foreach($galleries as $gallery)
                            <div class="col-md-1 mb-2">
                               <img src="{{ asset('storage/' . $gallery->location) }}" 
                                     class="img-thumbnail gallery-image selectable-img" 
                                     data-location="{{ $gallery->location }}" 
                                     style="cursor: pointer; width:100px; height:100px; ofject-fit:cover">
                            </div>
-                      @endforeach
+                      @endforeach -->
+                      <div class="row" id="galleryContainer"></div>
+                      <div class="text-center mt-3">
+                        <button id="loadMoreGallery" class="btn btn-primary">
+                           Load More
+                        </button>
+                     </div>
                   </div>
                   
                </div>
@@ -906,17 +912,73 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
 }
 
 
+//gallery iamge load
+function loadGallery() {
+      $.ajax({
+         url: "/galleryLoadJson",
+         type: "GET",
+         success: function(res){
+         let html = "";
+         res.forEach(function(item){
+            console.log(item);
+            html += `
+               <div class="col-md-1 mb-2">
+                     <img src="${item.url}"
+                           class="img-thumbnail gallery-image selectable-img"
+                           data-location="${item.location}"
+                           style="cursor:pointer;width:100px;height:100px;object-fit:cover">
+                  </div>
+            `;
+         });
+         console.log(html);
+         $("#galleryContainer").html(html);
+         if (res.length > 0) {
+            lastId = res[res.length - 1].id;
+         }
+      }
+   });
+}
+
+
+let lastId = 0;
+
+$('#loadMoreGallery').click(function () {
+    $.get('/galleryLoadJsonById', { id: lastId }, function (res) {
+        let html = '';
+        res.forEach(function (item) {
+            html += `
+            <div class="col-md-1 mb-2">
+                <img src="${item.url}"
+                     class="img-thumbnail gallery-image selectable-img"
+                     data-location="${item.location}"
+                     style="cursor:pointer;width:100px;height:100px;object-fit:cover">
+            </div>`;
+
+        });
+        $('#galleryContainer').append(html);
+        if (res.length > 0) {
+            lastId = res[res.length - 1].id;
+        }
+        if (res.length < 20) {
+            $('#loadMoreGallery').hide();
+        }
+    });
+});
+
+
+
 
    // ========== Modal Image Selection ==========
    $(document).on('click', '.openImageModal', function (e) {
       e.preventDefault();
       selectedTarget = $(this).data('target');
       $('#selectedImageTarget').val(selectedTarget);
+      loadGallery();
       $('#imageSelectModal').modal('show');
    });
 
 
-
+console.log($("#galleryContainer").length);
    
    
    //main image selection from gallery

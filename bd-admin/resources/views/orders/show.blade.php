@@ -8,7 +8,8 @@
             <h4>Order #{{ $order->id }} Details</h4>
             <h5>Customer Info</h5>
             <p><strong>Name:</strong>  {{ $order->first_name }} {{ $order->last_name }}</p>
-            <p><strong>Phone:</strong>  {{ $order->phone }}</p>
+            <p><strong>Contact No:</strong>  {{ $order->phone }}</p>
+            <p><strong>Alternative Contact No:</strong>  {{ $order->alternative_phone }}</p>
             <p><strong>Email:</strong>  {{ $order->email }}</p>
             <p><strong>Address:</strong>  {{ $order->address }}, {{ $order->city }}, {{ $order->district }}, {{ $order->postcode }}</p>
             <p><strong>Note:</strong> {{ $order->notes ?? '-' }}</p>

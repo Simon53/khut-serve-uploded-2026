@@ -33,7 +33,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.19.0/js/md5.min.js"></script>
 
-    <!--script type="text/javascript">
+    <script type="text/javascript">
         $('.loginForm').on('submit', function(event){
             event.preventDefault()
             let formData = $(this).serializeArray();
@@ -66,10 +66,10 @@
                 "timeOut": "3000"
             };
         });
-    </script-->
+    </script>
 
 
-    <script type="text/javascript">
+    <!-- <script type="text/javascript">
       // for server code
         $(document).ready(function(){
             // Toastr options
@@ -112,5 +112,5 @@
             });
 
         });
-    </script>
+    </script> -->
 @endsection
