@@ -11,7 +11,8 @@ class ProductOption extends Model
         'thumbnail_id',
         'common_size_id',
         'body_size_id',
-        'barcode'
+        'barcode',
+        'option_price',
     ];
 
     // Relation with Thumbnail

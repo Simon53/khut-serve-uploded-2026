@@ -46,10 +46,13 @@ class ProductController extends Controller{
             ->orWhere('sub_menu_id', $id)
             ->orWhere('child_menu_id', $id)
             ->orderBy('id', 'desc')
-            ->paginate(50);
+            //->paginate(40);
+            ->get();
 
             return view('product-categories.index', compact('products'));
         }
+
+       
 
     
    
@@ -121,11 +124,9 @@ class ProductController extends Controller{
 
 public function allProductsList($type) 
     {
-        $type = strtolower($type);
-        
+        $type = strtolower($type);     
         // Image base path define kora holo
         $baseImagePath = rtrim(env('ADMIN_BASE_URL'), '/') . '/storage/';
-
         $typeMap = [
             'new-arrivals' => 'new_arrivals',
             'patchwork' => 'patchwork',
@@ -162,7 +163,7 @@ public function allProductsList($type)
                 ->where('published_site', 'Y')
                 ->where('site_view_status', 'Y')
                 ->latest()
-                ->paginate(50);
+                ->paginate(40);
 
             $displayType = $category->name;
             $urlType = $type;
@@ -187,7 +188,7 @@ public function allProductsList($type)
                     $q->where('main_menu_id', $mainMenu->id)
                     ->orWhereIn('sub_menu_id', $subIds)
                     ->orWhereIn('child_menu_id', $childIds);
-                })->latest()->paginate(50);
+                })->latest()->paginate(40);
 
             $displayType = $mainMenu->name;
             $urlType = $type;

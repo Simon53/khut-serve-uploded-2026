@@ -7,24 +7,54 @@ document.addEventListener('DOMContentLoaded', function () {
 
     searchInput.addEventListener('keydown', function (e) {
 
-        if (e.key === 'Enter') {
-            e.preventDefault();
-
-            let q = this.value.trim();
-            if (q.length < 2) return;
-
-            fetch(`${window.BASE_URL}/search?q=${encodeURIComponent(q)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.slug) {
-                        window.location.href =
-                            `${window.BASE_URL}/product-details/${data.slug}`;
-                    } else {
-                        alert('Product not found');
-                    }
-                })
-                .catch(err => console.error(err));
+        if (e.key !== 'Enter') {
+            return;
         }
+
+        e.preventDefault();
+
+        const q = this.value.trim();
+
+        if (q.length < 1) {
+            return;
+        }
+
+        fetch(`${window.BASE_URL}/search?q=${encodeURIComponent(q)}`)
+            .then(res => {
+
+                if (!res.ok) {
+                    throw new Error('Search request failed');
+                }
+
+                return res.json();
+            })
+
+            .then(data => {
+
+                if (!data || !data.search_url) {
+
+                    alert('Product not available');
+
+                    return;
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | ALL MATCHING PRODUCTS-এর Search Page
+                |--------------------------------------------------------------------------
+                */
+
+                window.location.href = data.search_url;
+
+            })
+
+            .catch(err => {
+
+                console.error('Search Error:', err);
+
+                alert('Something went wrong while searching.');
+
+            });
 
     });
 

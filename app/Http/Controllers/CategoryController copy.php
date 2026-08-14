@@ -68,11 +68,7 @@ class CategoryController extends Controller
 
     public function listBySlug($slug)
     {
-        $mainMenus = Cache::remember(
-            'category_main_menus',
-            now()->addMinutes(30),
-            fn () => MainMenu::with('subMenus.childMenus')->get()
-        );
+        $mainMenus = MainMenu::with('subMenus.childMenus')->get();
 
         // Banner
         $banner = CategoryBanner::first();
@@ -254,11 +250,9 @@ class CategoryController extends Controller
 
 
             // Stock Catalog
-            $catalogRaw = Cache::remember(
-                'khut_catalog_all',
-                now()->addMinutes(5),
-                fn () => app(KhutCatalogService::class)->all()
-            );
+            $catalogRaw = app(
+                KhutCatalogService::class
+            )->all();
 
             $catalog = [];
 
@@ -354,11 +348,9 @@ class CategoryController extends Controller
 
 
             // Stock Catalog
-           $catalogRaw = Cache::remember(
-                'khut_catalog_all',
-                now()->addMinutes(5),
-                fn () => app(KhutCatalogService::class)->all()
-            );
+            $catalogRaw = app(
+                KhutCatalogService::class
+            )->all();
 
             $catalog = [];
 

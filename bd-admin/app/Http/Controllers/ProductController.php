@@ -84,11 +84,6 @@ public function productIndex(){
 
 
 
-   
- 
-    
- 
-  
 
     public function store(Request $request){
         try {
@@ -148,8 +143,7 @@ public function productIndex(){
             ]);
 
 
-           // $mainImage = $request->main_image;
-           // $mainImage = ltrim(str_replace('storage/', '', $mainImage), '/'); 
+         
            
            
 
@@ -206,24 +200,7 @@ public function productIndex(){
 
 
           
-       
-
-           /* if ($request->filled('thumbnail_images')) {
-                foreach ($request->thumbnail_images as $thumb) {
-                    $imagePath = $thumb['image_path'] ?? '';
-                    $imagePath = ltrim(str_replace('storage/', '', $imagePath), '/');
-                    if ($imagePath) {
-                        ProductThumbnail::create([
-                            'product_id' => $product->id,
-                            'image_path' => $imagePath, 
-                            'thumb_color' => $thumb['thumb_color'] ?? null,
-                            'thumb_size' => $thumb['thumb_size'] ?? null,
-                            'thumb_common_size' => $thumb['thumb_common_size'] ?? null,
-                            'thumb_barcode' => $thumb['thumb_barcode'] ?? null,
-                        ]);
-                    }
-                }
-            }*/
+  
             
             
         if ($request->filled('thumbnail_images')) {
@@ -532,49 +509,7 @@ public function productIndex(){
 
 
 
-   // ✅ Handle thumbnails and options
-  /*  $thumbnails = $request->filled('thumbnail_images') 
-        ? json_decode($request->thumbnail_images, true) 
-        : [];
-
-    if (!is_array($thumbnails)) $thumbnails = [];
-
-    $existingIds = ProductThumbnail::where('product_id', $product->id)->pluck('id')->toArray();
-    $updatedIds = [];
-
-    foreach ($thumbnails as $thumbData) {
-        if (!is_array($thumbData)) continue;
-
-        $thumbImagePath = isset($thumbData['image_path'])
-            ? ltrim(str_replace('storage/', '', $thumbData['image_path']), '/')
-            : null;
-
-        if (!empty($thumbData['id'])) {
-            $thumbnail = ProductThumbnail::find($thumbData['id']);
-            if ($thumbnail) {
-                $thumbnail->update([
-                    'image_path' => $thumbImagePath ?? $thumbnail->image_path,
-                    'thumb_color' => $thumbData['thumb_color'] ?? $thumbnail->thumb_color,
-                    'thumb_size' => $thumbData['thumb_size'] ?? $thumbnail->thumb_size,
-                    'thumb_common_size' => $thumbData['thumb_common_size'] ?? $thumbnail->thumb_common_size,
-                    'thumb_barcode' => $thumbData['thumb_barcode'] ?? $thumbnail->thumb_barcode,
-                ]);
-            }
-        } else {
-            $thumbnail = ProductThumbnail::create([
-                'product_id' => $product->id,
-                'image_path' => $thumbImagePath,
-                'thumb_color' => $thumbData['thumb_color'] ?? null,
-                'thumb_size' => $thumbData['thumb_size'] ?? null,
-                'thumb_common_size' => $thumbData['thumb_common_size'] ?? null,
-                'thumb_barcode' => $thumbData['thumb_barcode'] ?? null,
-            ]);
-        }
-
-        $updatedIds[] = $thumbnail->id;*/
-        
-        
-        // ✅ Handle thumbnails and options
+  
 $thumbnails = $request->filled('thumbnail_images') 
     ? json_decode($request->thumbnail_images, true) 
     : [];
@@ -637,7 +572,7 @@ foreach ($thumbnails as $thumbData) {
     $updatedIds[] = $thumbnail->id;
 
 
-    // ✅ Handle product options under this thumbnail
+    
         $optionIds = [];
         if (!empty($thumbData['options']) && is_array($thumbData['options'])) {
             foreach ($thumbData['options'] as $opt) {
@@ -651,6 +586,7 @@ foreach ($thumbnails as $thumbData) {
                             'common_size_id' => $opt['common_size_id'] ?? null,
                             'body_size_id' => $opt['body_size_id'] ?? null,
                             'barcode' => $opt['barcode'] ?? null,
+                            'option_price' => $opt['option_price'] ?? null,
                         ]);
                         $optionIds[] = $option->id;
                     }
@@ -660,12 +596,13 @@ foreach ($thumbnails as $thumbData) {
                         'common_size_id' => $opt['common_size_id'] ?? null,
                         'body_size_id' => $opt['body_size_id'] ?? null,
                         'barcode' => $opt['barcode'] ?? null,
+                        'option_price' => $opt['option_price'] ?? null,
                     ]);
                     $optionIds[] = $option->id;
                 }
             }
 
-            // Delete old options that are not in request
+            
             \App\Models\ProductOption::where('thumbnail_id', $thumbnail->id)
                 ->whereNotIn('id', $optionIds)
                 ->delete();

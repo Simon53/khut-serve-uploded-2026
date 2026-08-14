@@ -21,14 +21,12 @@
             <!-- Tabs -->
             <ul class="nav new-nav-tabs" id="checkoutTabs" role="tablist">
                 <li><a class="nav-link active" id="billing-tab" data-toggle="tab" href="#billing" role="tab" data-step="1">Billing</a></li>
-             
                 <li><a class="nav-link disabled" id="review-tab" data-toggle="tab" href="#review" role="tab" data-step="3" style="pointer-events: none; opacity: 0.6;">Order Review</a></li>
                 <li><a class="nav-link disabled" id="payment-tab" data-toggle="tab" href="#payment" role="tab" data-step="4" style="pointer-events: none; opacity: 0.6;">Payment</a></li>
             </ul>
 
             <!-- Tab Content -->
             <div class="tab-content checkoutTabLebel pt-3" id="checkoutTabContent">
-
                 <!-- Billing Tab -->
                 <div class="tab-pane fade show active" id="billing" role="tabpanel">
                     <div class="titel"><h2>Billing details</h2></div>
@@ -229,10 +227,8 @@
 <script>
     function isOutsideDhakaButSelectedDhaka(postcode) {
         const postcodeNum = parseInt(postcode);
-
         const isSavar = (postcodeNum >= 1340 && postcodeNum <= 1349);
         const isNarayanganj = (postcodeNum >= 1400 && postcodeNum <= 1430);
-
         return isSavar || isNarayanganj;
     }
 
@@ -258,8 +254,6 @@
 </script>
 
 <script>
-
-    
 
     // Track completed steps
     const completedSteps = {

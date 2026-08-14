@@ -1,16 +1,55 @@
 
 
 
-<!-- ===== Slider Start ===== -->
+  <!-- ===== Slider Start ===== -->
       <div class="slider-container">
         <!-- Carousel -->
         <div id="customCarousel" class="carousel slide" data-bs-ride="carousel">
              <div class="carousel-inner">
-                  @foreach($sliders as $key => $slider)
+                  <!-- @foreach($sliders as $key => $slider)
                         <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
                            <img src="{{ $slider->full_image }}" class="sliderImgSize" alt="Slide {{ $key + 1 }}">
                         </div>
-                    @endforeach
+                    @endforeach -->
+
+                  @foreach($sliders as $key => $slider)
+
+                    <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+
+                        @if($slider->video_url)
+
+                            <iframe
+                                class="sliderImgSize"
+                                src="{{ $slider->video_url }}"
+                                frameborder="0"
+                                allow="autoplay; encrypted-media"
+                                allowfullscreen>
+                            </iframe>
+
+                                @else
+
+                                    @php
+                                        $ext = strtolower(pathinfo($slider->full_image, PATHINFO_EXTENSION));
+                                    @endphp
+
+                                    @if(in_array($ext, ['mp4','webm','mov','avi','wmv','mkv']))
+
+                                        <video class="sliderImgSize" autoplay  loop   playsinline height="550px" width="100%">
+                                            <source src="{{ $slider->full_image }}" type="video/mp4">
+                                            Your browser does not support the video tag.
+                                        </video>
+
+                                    @else
+
+                                        <img src="{{ $slider->full_image }}" class="sliderImgSize" alt="Slide {{ $key + 1 }}">
+
+                                    @endif
+
+                                @endif
+
+                            </div>
+
+                            @endforeach
              </div>
 
              <!-- Controls -->
@@ -69,4 +108,9 @@
     underModal.show();
   });
 </script-->
+
+
+
+
+
       

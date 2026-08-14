@@ -2606,6 +2606,272 @@ table{
     display:none;
 }
 
+.review-desktop-table table {
+    width: 100%;
+}
+
+.review-desktop-table tfoot td {
+    padding: 8px 12px;
+}
+
+.review-desktop-table tfoot td:last-child {
+    text-align: left;
+    white-space: nowrap;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =====================================================
+   MOBILE ONLY
+   Desktop will remain exactly the same
+===================================================== */
+
+@media (max-width: 767px) {
+
+    /* No horizontal scroll */
+    #orderSummary .table-responsive {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+
+    #orderSummary table {
+        width: 100% !important;
+        table-layout: fixed !important;
+    }
+
+    /* Hide desktop header */
+    #orderSummary table thead {
+        display: none !important;
+    }
+
+    /* Each product becomes a vertical card */
+    #orderSummary table tbody tr {
+        display: grid !important;
+
+        grid-template-columns: 62px 1fr auto;
+
+        grid-template-areas:
+            "image product remove"
+            "image size price"
+            "image color price"
+            "image barcode price"
+            "image qty price";
+
+        width: 100% !important;
+
+        padding: 12px 0;
+
+        border-bottom: 1px solid #ddd;
+    }
+
+    #orderSummary table tbody td {
+        border: none !important;
+
+        padding: 2px 5px !important;
+
+        min-width: 0 !important;
+
+        width: auto !important;
+
+        overflow: hidden;
+    }
+
+
+    /* =========================
+       IMAGE
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(1) {
+        grid-area: image;
+
+        align-self: start;
+
+        padding-left: 0 !important;
+    }
+
+    #orderSummary table tbody td:nth-child(1) img {
+        width: 55px !important;
+        height: 55px !important;
+
+        object-fit: cover;
+
+        border-radius: 6px;
+    }
+
+
+    /* =========================
+       PRODUCT NAME
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(2) {
+        grid-area: product;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        line-height: 1.3;
+
+        white-space: normal;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    /* =========================
+       SIZE
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(3) {
+        grid-area: size;
+
+        font-size: 11px;
+
+        color: #777;
+
+        display: block !important;
+    }
+
+
+    /* =========================
+       COLOR
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(4) {
+        grid-area: color;
+
+        font-size: 11px;
+
+        color: #777;
+
+        display: block !important;
+
+        margin-left: 0 !important;
+    }
+
+
+    /* =========================
+       BARCODE
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(5) {
+        grid-area: barcode;
+
+        display: block !important;
+
+        font-size: 11px;
+
+        color: #777;
+
+        white-space: nowrap;
+
+        overflow: hidden;
+
+        text-overflow: ellipsis;
+    }
+
+
+    /* =========================
+       QUANTITY
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(6) {
+        grid-area: qty;
+        display: block !important;
+        font-size: 11px;
+        color: #777;
+        margin: 0 !important;
+    }
+
+    #orderSummary table tbody td:nth-child(6) input {
+        width: 55px !important;
+        height: 27px !important;
+        padding: 2px 5px !important;
+        font-size: 12px !important;
+        display: inline-block;
+    }
+
+
+    /* =========================
+       PRICE
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(7) {
+        grid-area: price;
+
+        align-self: center;
+
+        text-align: right !important;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        white-space: nowrap;
+
+        padding-right: 0 !important;
+    }
+
+
+    /* =========================
+       REMOVE X
+    ========================= */
+
+    #orderSummary table tbody td:nth-child(8) {
+        grid-area: remove;
+
+        text-align: right !important;
+
+        padding-right: 0 !important;
+    }
+
+    #orderSummary .removeItem {
+        border: none !important;
+
+        background: transparent !important;
+
+        color: #dc3545 !important;
+
+        font-size: 21px !important;
+
+        font-weight: bold;
+
+        line-height: 1;
+
+        padding: 0 3px !important;
+
+        cursor: pointer;
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @media (max-width:768px){
 
     .desktop-only-section{

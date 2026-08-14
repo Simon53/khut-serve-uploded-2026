@@ -87,8 +87,6 @@
                         alt="{{ $featureProduct->name_en }}" 
                         class="img-fluid" 
                         style="float: right;"
-                        fetchpriority="high"
-                        decoding="async"
                      >
                   </a>
                
@@ -185,9 +183,7 @@
                            <img
                               src="{{ $baseImagePath . $product->main_image }}"
                               class="img-resize-2 img-fluid"
-                              alt="{{ $product->name_en }}"
-                               loading="lazy"
-                               decoding="async">
+                              alt="{{ $product->name_en }}">
                         </a>
 
                         <div class="image-hover-content-topLink">
@@ -242,9 +238,7 @@
                         <img
                            src="{{ $baseImagePath . $product->main_image }}"
                            class="img-resize-1 img-fluid"
-                           alt="{{ $product->name_en }}"
-                           loading="lazy"
-                           decoding="async">
+                           alt="{{ $product->name_en }}">
                      </a>
 
                      <div class="image-hover-content-cottonSareeLink">
@@ -350,9 +344,7 @@
                src="{{ $baseImagePath . $highlightFour->main_image }}"
                class="img-resize-1"
                alt="{{ $highlightFour->name_en }}"
-               style="height:310px"
-               loading="lazy"
-               decoding="async">
+               style="height:310px">
          </a>
 
          <div class="image-hover-content-cottonSareeLink image-hover-content-cottonSareeLink-to-xtra">
@@ -748,12 +740,7 @@
 
                   <div class="col-lg-7 right-content">
                      <a href="{{ route('product.details', $featureTwoProduct->slug) }}">
-                        <img src="{{ $baseImagePath . $featureTwoProduct->main_image  }}"
-                         class="img-fluid img-resize-2" 
-                         style="float: right;" 
-                         alt="{{ $featureTwoProduct->name_en }}"
-                          loading="lazy"
-                           decoding="async">
+                        <img src="{{ $baseImagePath . $featureTwoProduct->main_image  }}" class="img-fluid img-resize-2" style="float: right;" alt="{{ $featureTwoProduct->name_en }}">
                      </a>
 
                    
@@ -882,19 +869,13 @@
          
          <div data-aos="fade-right" style="margin-left: 10px;">
             @if($festiveLeft)
-               <img src="{{ $baseImagePath . $festiveLeft->main_image }}" 
-               class="img-fluid" 
-               alt="Festive Left"  loading="lazy"
-                  decoding="async"
-               >
+               <img src="{{ $baseImagePath . $festiveLeft->main_image }}" class="img-fluid" alt="Festive Left"">
             @endif
          </div>
 
          <div data-aos="fade-left" style="padding:0px">
             @if($festiveRight)
-               <img src="{{ $baseImagePath . $festiveRight->main_image }}" class="img-fluid" alt="Festive Right"  loading="lazy"
-                  decoding="async"
-               >
+               <img src="{{ $baseImagePath . $festiveRight->main_image }}" class="img-fluid" alt="Festive Right"">
             @endif
          </div>
 
@@ -934,12 +915,7 @@
                      @forelse($patchworkProducts as $product)
                         <div class="swiper-slide slide-item">
                            <a href="{{ route('product.details', $product->slug) }}">
-                              <img src="{{ $baseImagePath . $product->main_image  }}" 
-                              class="slide-img" 
-                              alt="{{ $product->name_en }}"
-                              loading="lazy"
-                              decoding="async"
-                              >
+                              <img src="{{ $baseImagePath . $product->main_image  }}" class="slide-img" alt="{{ $product->name_en }}">
                               <div class="overlaysSlider price">
                                  {{ $product->name_en }} <br>
                                  BDT {{ number_format($product->price, 0) }}
@@ -985,11 +961,7 @@
             @forelse($HozoboroloProducts as $product)
                <div class="col-lg-3 col-md-6 col-6 hozoboro-text text-center mb-4">
                   <a href="{{ route('product.details', $product->slug) }}">  
-                     <img src="{{ $baseImagePath . $product->main_image }}" 
-                     class="home-hozoborolo-size" 
-                     alt="{{ $product->name_en }}"
-                     loading="lazy"
-                     decoding="async" />
+                     <img src="{{ $baseImagePath . $product->main_image }}" class="home-hozoborolo-size" alt="{{ $product->name_en }}" />
                      <h3 class="mt-2">{{ $product->name_en }}</h3>
                   </a> 
                </div>
@@ -1014,10 +986,7 @@
             <div class="col-lg-5 col-md-6 col-sm-12 mt-2 hozoboro-text">
                 <img src="{{ $baseImagePath . $bottomContent->main_image }}"
                            class="home-hozoborolo-big"
-                           alt="Bottom Image" 
-                           loading="lazy"
-                           decoding="async"
-                           />
+                           alt="Bottom Image" />
             </div>
             <div class="col-lg-7 col-md-8 col-sm-12 mt-2 hozoboro-text-2" >
                {!! $bottomContent->details !!}
@@ -1051,12 +1020,7 @@
                               <div class="swiper-slide p-2">
                                    <a href="{{ route('khut-stories.details', $story->id) }}">
                                     <div class="col-md-12 slide-item slide-item-hozoborolo">
-                                          <img src="{{ $adminBaseUrl . $story->image }}" 
-                                          class="slide-img-new" 
-                                          alt="{{ $story->title }}"
-                                          loading="lazy"
-                                          decoding="async"
-                                          >
+                                          <img src="{{ $adminBaseUrl . $story->image }}" class="slide-img-new" alt="{{ $story->title }}">
                                     </div>
                                  </a>
                                  <div class="wiper-slide-info-unique p-4">

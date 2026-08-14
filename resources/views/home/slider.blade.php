@@ -35,13 +35,20 @@
                                     @if(in_array($ext, ['mp4','webm','mov','avi','wmv','mkv']))
 
                                         <video class="sliderImgSize" autoplay  loop   playsinline height="550px" width="100%">
-                                            <source src="{{ $slider->full_image }}" type="video/mp4">
+                                            <source src="{{ $slider->full_image }}" type="video/mp4"
+                                            fetchpriority="high"
+                                            decoding="async">
                                             Your browser does not support the video tag.
                                         </video>
 
                                     @else
 
-                                        <img src="{{ $slider->full_image }}" class="sliderImgSize" alt="Slide {{ $key + 1 }}">
+                                        <img src="{{ $slider->full_image }}" 
+                                        class="sliderImgSize" 
+                                        alt="Slide {{ $key + 1 }}"
+                                        fetchpriority="high"
+                                        decoding="async"
+                                        >
 
                                     @endif
 

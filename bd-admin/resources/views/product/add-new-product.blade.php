@@ -915,7 +915,7 @@ function appendImageToPreview(previewContainer, hiddenInput, imageUrl) {
 //gallery iamge load
 function loadGallery() {
       $.ajax({
-         url: "/galleryLoadJson",
+         url: "/bd-admin/public/galleryLoadJson",
          type: "GET",
          success: function(res){
          let html = "";
@@ -943,7 +943,7 @@ function loadGallery() {
 let lastId = 0;
 
 $('#loadMoreGallery').click(function () {
-    $.get('/galleryLoadJsonById', { id: lastId }, function (res) {
+    $.get('/bd-admin/public/galleryLoadJsonById', { id: lastId }, function (res) {
         let html = '';
         res.forEach(function (item) {
             html += `
@@ -959,7 +959,7 @@ $('#loadMoreGallery').click(function () {
         if (res.length > 0) {
             lastId = res[res.length - 1].id;
         }
-        if (res.length < 20) {
+        if (res.length < 10) {
             $('#loadMoreGallery').hide();
         }
     });

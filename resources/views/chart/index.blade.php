@@ -108,8 +108,10 @@ function loadOrderSummary() {
         <p>Subtotal: ${subtotal.toLocaleString()} BDT</p>
         <p>Delivery: ${delivery.toLocaleString()} BDT</p>
         <hr>
-        <h5>Total (incl. VAT): ${grandTotal.toLocaleString()} BDT</h5>
-        <small class="text-muted">Includes VAT: ${totalTax.toLocaleString()} BDT</small>
+        <h5 >Total (incl. VAT): ${grandTotal.toLocaleString()} BDT</h5>
+        <small class="text-muted" style="display: none;">
+            Includes VAT: ${totalTax.toLocaleString()} BDT
+        </small>
         <!--a href="/checkout" class="btn  mt-2">Proceed to checkout</a-->
        
         <button id="checkoutBtn" class="btn btn-primary checkout-Btn w-100" data-url="{{ route('checkout.index') }}">

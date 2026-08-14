@@ -653,17 +653,33 @@
                                                 <input type="text" class="form-control form-control-sm col-md-12  barcode-input" 
                                                          value="{{ $thumb->thumb_barcode }}">
                                              </div>
+                                             
+                                             @php
+                                                $thumbOptions = $thumb->options->map(function ($o) {
+                                                    return [
+                                                        'common_size_id' => $o->common_size_id,
+                                                        'body_size_id'   => $o->body_size_id,
+                                                        'barcode'        => $o->barcode,
+                                                        'option_price'   => $o->option_price,
+                                                    ];
+                                                });
+                                            @endphp
 
                                              <!-- Add Option button -->
-                                             <div class="thumbnail-wrapper" data-id="{{ $thumb->id }}" 
-                                                data-options='@json($thumb->options->map(function($o){ return [
-                                                      "common_size_id"=>$o->common_size_id,
-                                                      "body_size_id"=>$o->body_size_id,
-                                                      "barcode"=>$o->barcode
-                                                ]; }))'>
-                                                <img style="display:none" src="{{ $thumb->image_path }}" class="img-thumbnail" style="width:150px;">
-                                                <button type="button" class="btn btn-sm btn-info add-thumb-option">Add/View/Edit Options</button>
-                                             </div>
+                                             <div class="thumbnail-wrapper"
+                                                 data-id="{{ $thumb->id }}"
+                                                 data-options='@json($thumbOptions)'>
+                                            
+                                                <img style="display:none"
+                                                     src="{{ $thumb->image_path }}"
+                                                     class="img-thumbnail"
+                                                     style="width:150px;">
+                                            
+                                                <button type="button"
+                                                        class="btn btn-sm btn-info add-thumb-option">
+                                                    Add/View/Edit Options
+                                                </button>
+                                            </div>
                                           </div>
                                     @endforeach
                                  </div>
@@ -1092,7 +1108,7 @@ $(document).ready(function() {
 //gallery iamge load
 function loadGallery() {
       $.ajax({
-         url: "/galleryLoadJson",
+         url: "/bd-admin/public/galleryLoadJson",
          type: "GET",
          success: function(res){
          let html = "";
@@ -1120,7 +1136,7 @@ function loadGallery() {
 let lastId = 0;
 
 $('#loadMoreGallery').click(function () {
-    $.get('/galleryLoadJsonById', { id: lastId }, function (res) {
+    $.get('/bd-admin/public/galleryLoadJsonById', { id: lastId }, function (res) {
         let html = '';
         res.forEach(function (item) {
             html += `
@@ -1206,7 +1222,8 @@ $('#loadMoreGallery').click(function () {
                 id: $(this).data('id') || null,
                 common_size_id: $(this).find('.common-size-select').val() || null,
                 body_size_id: $(this).find('.body-size-select').val() || null,
-                barcode: $(this).find('.barcode-input').val() || null
+                barcode: $(this).find('.barcode-input').val() || null,
+                option_price: $(this).find('.option-price-input').val() || null
             });
         });
     
@@ -1237,7 +1254,8 @@ $('#loadMoreGallery').click(function () {
       });
 
       let barcode = data.barcode ?? '';
-
+      let optionPrice = data.option_price ?? '';  
+      
       return `
          <div class="row align-items-end mb-2 thumb-option-row border p-2 rounded">
             <div class="col-md-4">
@@ -1246,16 +1264,20 @@ $('#loadMoreGallery').click(function () {
                   ${commonSizeOptions}
                </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                <label class="small fw-bold">Body Size</label>
                <select class="form-control form-control-sm body-size-select">
                   ${bodySizeOptions}
                </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                <label class="small fw-bold">Barcode</label>
                <input type="text" class="form-control form-control-sm barcode-input" value="${barcode}">
             </div>
+            <div class="col-md-2">
+                <label class="small fw-bold">Price (if need)</label>
+                <input type="text" class="form-control form-control-sm option-price-input" value="${optionPrice}" placeholder="Option Price">
+            </div>        
             <div class="col-md-1 text-right">
                <button type="button" class="btn btn-sm btn-danger remove-option-row">&times;</button>
             </div>

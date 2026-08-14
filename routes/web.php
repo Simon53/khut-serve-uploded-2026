@@ -16,6 +16,12 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SslCommerzPaymentController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\WishlistController;
+
+//use for server imgage-view
+use Illuminate\Support\Facades\Response;
+//use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\File;
+
 use Illuminate\Support\Facades\Mail;
 
 Route::get('/test-mail', function () {
@@ -28,10 +34,7 @@ Route::get('/test-mail', function () {
     return 'Mail Sent';
 });
 
-//use for server imgage-view
-use Illuminate\Support\Facades\Response;
-//use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\File;
+
 
 Route::get('/stock/{sku}', [StockController::class, 'getStock']);
 Route::get('/product/{id}', [ProductController::class, 'showProduct'])->name('product.show');
@@ -137,6 +140,7 @@ Route::get('/menu-products/{slug}', [ProductController::class, 'menuProducts'])-
 
 
 Route::get('/search', [SearchController::class, 'search'])->name('search');
+Route::get('/search-results', [SearchController::class, 'results'])->name('search.results');
 
 
 //cart route

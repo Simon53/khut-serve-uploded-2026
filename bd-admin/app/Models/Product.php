@@ -73,6 +73,8 @@ class Product extends Model{
    }
 
 
+
+
     public function dryWashes(){
         return $this->belongsToMany( DryWash::class,        // Related model
             'product_dry_washes',  // Pivot table
@@ -92,5 +94,7 @@ class Product extends Model{
     public function childMenu() {
         return $this->belongsTo(ChildMenu::class);
     }
+
+   
    
 }

@@ -16,68 +16,126 @@
     $baseImagePath = env('ADMIN_BASE_URL') . '/storage/';
 @endphp
 
-<!-- ===== Banner Section Start ===== -->
+{{-- ========================================================= --}}
+{{-- BANNER --}}
+{{-- Search Result হলে Banner দেখাবে না --}}
+{{-- ========================================================= --}}
+
+@if(!request()->is('search-results'))
+
+    <div class="innerBanner">
+
+        @php
+
+            $adminBaseUrl = env('ADMIN_BASE_URL');
+
+            if (!empty($category->banner)) {
+
+                $bannerUrl = $adminBaseUrl . $category->banner;
+
+            } elseif (!empty($banner->banner_image)) {
+
+                $bannerUrl = $adminBaseUrl . $banner->banner_image;
+
+            } else {
+
+                $bannerUrl = asset(
+                    'assets/images/product_banner.jpg'
+                );
+
+            }
+
+            $bannerTitle =
+                $category->title
+                ?? $banner->title
+                ?? $category->name
+                ?? 'Products';
+
+        @endphp
 
 
-<div class="innerBanner">
-   @php
-    $adminBaseUrl = env('ADMIN_BASE_URL'); 
+        <img
+            src="{{ $bannerUrl }}"
+            class="img-fluid img-resize-banner banner-animate"
+            alt="{{ $bannerTitle }}"
+        >
 
-        if (!empty($category->banner)) {
-            $bannerUrl = $adminBaseUrl . $category->banner;
-        } elseif (!empty($banner->banner_image)) {
-            $bannerUrl = $adminBaseUrl . $banner->banner_image;
-        } else {
-            $bannerUrl = asset('assets/images/product_banner.jpg');
-        }
-
-        $bannerTitle = $category->title ?? $banner->title ?? $category->name ?? 'Products';
-    @endphp
-
-       <img src="{{ $bannerUrl }}" 
-     class="img-fluid img-resize-banner banner-animate" 
-     alt="{{ $bannerTitle }}">
 
         <div class="banner-overlay"></div>
 
-    <div class="d-flex justify-content-center position-absolute w-100 top-50 start-50 translate-middle">
-        <h1 class="text-white">{{ $bannerTitle }}</h1>
+
+        <div class="d-flex justify-content-center position-absolute w-100 top-50 start-50 translate-middle">
+
+            <h1 class="text-white">
+                {{ $bannerTitle }}
+            </h1>
+
+        </div>
+
+
+        <div class="ribon"></div>
+
+
+        <div class="container mt-2">
+
+            <div class="bradcum-category">
+
+                <a href="{{ url('/') }}">
+                    Home
+                </a>
+
+
+                @if(!empty($mainMenu))
+
+                    /
+
+                    <a href="{{ url('category/'.$mainMenu->name) }}">
+                        {{ $mainMenu->name }}
+                    </a>
+
+                @endif
+
+
+                @if(!empty($subMenu))
+
+                    /
+
+                    <a href="{{ url('subcategory/'.$subMenu->id) }}">
+                        {{ $subMenu->name }}
+                    </a>
+
+                @endif
+
+
+                @if(!empty($childMenu))
+
+                    /
+
+                    <a href="{{ url('childcategory/'.$childMenu->id) }}">
+                        {{ $childMenu->name }}
+                    </a>
+
+                @elseif(!empty($category))
+
+                    /
+
+                    <span>
+                        {{ $category->name }}
+                    </span>
+
+                @endif
+
+            </div>
+
+        </div>
+
     </div>
 
-    <div class="ribon"></div>
+@endif
 
-    <div class="container mt-2">
-        <div class="bradcum-category">
-   <a href="{{ url('/') }}">Home</a>
-
-    @if(!empty($mainMenu))
-        /
-        <a href="{{ url('category/'.$mainMenu->name) }}">
-            {{ $mainMenu->name }}
-        </a>
-    @endif
-
-    @if(!empty($subMenu))
-        /
-        <a href="{{ url('subcategory/'.$subMenu->id) }}">
-            {{ $subMenu->name }}
-        </a>
-    @endif
-
-    @if(!empty($childMenu))
-        /
-        <a href="{{ url('childcategory/'.$childMenu->id) }}">
-            {{ $childMenu->name }}
-        </a>
-    @elseif(!empty($category))
-        /
-        <span>{{ $category->name }}</span>
-    @endif
-</div>
-
-    </div>
-</div>
-<!-- ===== Banner Section End ===== -->
+{{-- ========================================================= --}}
+{{-- END BANNER --}}
+{{-- ========================================================= --}}
 
 
 

@@ -98,10 +98,7 @@
                 
                 <div id="mobileZoomModal">
                     <span class="closeZoom">&times;</span>
-                    <img src="{{ $baseImagePath . $firstImage }}"
-                     alt="{{ $product->name_en }}"
-                    loading="lazy"
-                    decoding="async">
+                    <img src="{{ $baseImagePath . $firstImage }}">
                 </div>
                                     
                 <!-- Thumbnails -->
@@ -112,9 +109,7 @@
                              data-full="{{ $baseImagePath . $thumb->image_path }}"
                              data-color="{{ $thumb->color->color_name ?? '' }}"
                              data-barcode="{{ $thumb->thumb_barcode ?? 'NO_BARCODE' }}"
-                             alt="Thumb"
-                             loading="lazy"
-                             decoding="async">
+                             alt="Thumb">
                     @endforeach
                 </div>
             </div>
@@ -153,21 +148,13 @@
                 <h1 class="mt-4">{{ $product->name_bn }}</h1>
                 <h2 class="mt-4">{{ $product->name_en }}</h2>
 
-                <div id="productPrice">
+                <div>
                     @if($product->sale_price && $product->sale_price < $product->price)
-                        <span id="currentPrice" class="text-danger h4">
-                            ৳{{ number_format($product->sale_price, 0) }}
-                        </span>
-
-                        <del id="oldPrice" class="text-muted">
-                            ৳{{ number_format($product->price, 0) }}
-                        </del>
+                        <span class="text-danger h4">৳{{ number_format($product->sale_price, 0) }}</span>
+                        <del class="text-muted">৳{{ number_format($product->price, 0) }}</del>
                     @else
-                        <span id="currentPrice" class="h4">
-                            ৳{{ number_format($product->price, 0) }}
-                        </span>
+                        <span class="h4">৳{{ number_format($product->price, 0) }}</span>
                     @endif
-
                     <small>inc. VAT</small>
                 </div>
 
@@ -245,15 +232,10 @@
                                 @php
                                     $firstThumb = $thumbGroup->first();
                                     $sizes = $firstThumb->options->map(function($opt) use ($firstThumb) {
-                                    $sizeValue = $opt->commonSize?->common_size ?? $opt->bodySize?->body_size;
-                                    $barcodeValue = $opt->barcode ?: $firstThumb->thumb_barcode ?: 'NO_BARCODE';
-
-                                    return $sizeValue ? [
-                                        'size' => $sizeValue,
-                                        'barcode' => $barcodeValue,
-                                        'option_price' => $opt->option_price
-                                    ] : null;
-                                })->filter()->values();
+                                        $sizeValue = $opt->commonSize?->common_size ?? $opt->bodySize?->body_size;
+                                        $barcodeValue = $opt->barcode ?: $firstThumb->thumb_barcode ?: 'NO_BARCODE';
+                                        return $sizeValue ? ['size'=>$sizeValue,'barcode'=>$barcodeValue] : null;
+                                    })->filter()->values();
                                 @endphp
                                 @if($firstThumb->color)
                                 <button class="colorBtn btn btn-outline-secondary m-1"
@@ -438,9 +420,7 @@
                   <img 
                     src="{{ $baseImagePath . $related->main_image }}" 
                     class="img-fluid img-list-resize" 
-                    alt="{{ $related->name_en }}"
-                    loading="lazy"
-                    decoding="async">
+                    alt="{{ $related->name_en }}">
 
                   @if(!$inStock)
                     <div class="sold-out">Sold Out</div>
@@ -547,7 +527,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedColor = null;
     let selectedSize = null;
     let selectedBarcode = barcodeDisplay?.dataset.thumbBarcode || null;
-    let selectedOptionPrice = null;
 
 
     // =========================================================
@@ -917,30 +896,20 @@ document.addEventListener("DOMContentLoaded", () => {
                         sizeBtn.classList.add("active");
 
 
-                       selectedSize = opt.size;
+                        selectedSize =
+                            opt.size;
 
-                        selectedBarcode = opt.barcode || thumbBarcode;
 
-                        selectedOptionPrice = opt.option_price;
+                        selectedBarcode =
+                            opt.barcode ||
+                            thumbBarcode;
 
-                        // Screen-এর price change
-                        if (
-                            opt.option_price !== null &&
-                            opt.option_price !== undefined &&
-                            opt.option_price !== '' &&
-                            Number(opt.option_price) > 0
-                        ) {
-                            const currentPrice = document.getElementById('currentPrice');
-
-                            if (currentPrice) {
-                                currentPrice.textContent =
-                                    '৳' + Number(opt.option_price).toLocaleString('en-US');
-                            }
-                        }
 
                         updateBarcodeDisplay();
 
+
                         fetchStock(selectedBarcode);
+
 
                         validateInputs();
 
@@ -1108,12 +1077,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     '/images/no-image.png',
 
                 price:
-                    selectedOptionPrice !== null &&
-                    selectedOptionPrice !== undefined &&
-                    selectedOptionPrice !== '' &&
-                    Number(selectedOptionPrice) > 0
-                        ? Number(selectedOptionPrice)
-                        : Number(addToCartBtn.dataset.price) || 0,
+                    Number(
+                        addToCartBtn.dataset.price
+                    ) || 0,
 
                 qty: qty,
 
